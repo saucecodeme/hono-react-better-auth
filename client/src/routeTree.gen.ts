@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TqueryRouteImport } from './routes/tquery'
+import { Route as TodosRouteImport } from './routes/todos'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +19,16 @@ import { Route as IndexRouteImport } from './routes/index'
 const TqueryRoute = TqueryRouteImport.update({
   id: '/tquery',
   path: '/tquery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TodosRoute = TodosRouteImport.update({
+  id: '/todos',
+  path: '/todos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -39,12 +51,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/signup': typeof SignupRoute
+  '/todos': typeof TodosRoute
   '/tquery': typeof TqueryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/signup': typeof SignupRoute
+  '/todos': typeof TodosRoute
   '/tquery': typeof TqueryRoute
 }
 export interface FileRoutesById {
@@ -52,20 +68,24 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/signup': typeof SignupRoute
+  '/todos': typeof TodosRoute
   '/tquery': typeof TqueryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/auth' | '/tquery'
+  fullPaths: '/' | '/about' | '/auth' | '/signup' | '/todos' | '/tquery'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/auth' | '/tquery'
-  id: '__root__' | '/' | '/about' | '/auth' | '/tquery'
+  to: '/' | '/about' | '/auth' | '/signup' | '/todos' | '/tquery'
+  id: '__root__' | '/' | '/about' | '/auth' | '/signup' | '/todos' | '/tquery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  SignupRoute: typeof SignupRoute
+  TodosRoute: typeof TodosRoute
   TqueryRoute: typeof TqueryRoute
 }
 
@@ -76,6 +96,20 @@ declare module '@tanstack/react-router' {
       path: '/tquery'
       fullPath: '/tquery'
       preLoaderRoute: typeof TqueryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/todos': {
+      id: '/todos'
+      path: '/todos'
+      fullPath: '/todos'
+      preLoaderRoute: typeof TodosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -106,6 +140,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  SignupRoute: SignupRoute,
+  TodosRoute: TodosRoute,
   TqueryRoute: TqueryRoute,
 }
 export const routeTree = rootRouteImport

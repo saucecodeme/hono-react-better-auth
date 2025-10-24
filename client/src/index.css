@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* @plugin "daisyui" {
+  themes: abyss --default;
+} */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -96,6 +99,9 @@
   --s-primary: #ffffff;
   --s-primary-foreground: #696969;
   --s-primary-foreground-unique: #3238fa;
+  --s-destructive: #ed5b66;
+  --s-input: #fffcec;
+  --s-ring: #f38e89;
 }
 
 .dark {
@@ -142,6 +148,9 @@
   --color-s-primary: var(--s-primary);
   --color-s-primary-foreground: var(--s-primary-foreground);
   --color-s-primary-foreground-unique: var(--s-primary-foreground-unique);
+  --color-s-destructive: var(--s-destructive);
+  --color-s-input: var(--s-input);
+  --color-s-ring: var(--s-ring);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -190,7 +199,7 @@
     line-height: 1.5;
     font-weight: 500;
     font-size: 14px;
-
+    box-sizing: border-box;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     /* -webkit-font-smoothing: antialiased; */

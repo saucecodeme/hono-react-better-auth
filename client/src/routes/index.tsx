@@ -30,7 +30,7 @@ function Index() {
         <h1 className="text-5xl font-bold text-center leading-snug">
           The auth just <i className="italic">feels</i>
           <br /> better with{' '}
-          <span className="text-[#ed5b66]">Better Auth.</span>
+          <span className="text-s-destructive">Better Auth.</span>
         </h1>
       </div>
     </section>

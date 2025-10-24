@@ -8,6 +8,13 @@
       "when": 1761264959601,
       "tag": "0000_lethal_nick_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761278651881,
+      "tag": "0001_clammy_electro",
+      "breakpoints": true
     }
   ]
 }
