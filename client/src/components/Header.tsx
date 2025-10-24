@@ -29,12 +29,12 @@ export function Header() {
               <BadgeInfo size={12} strokeWidth={3} />
             </TButton>
           </Link>
-          <Link to="/tquery" className="">
+          {/* <Link to="/tquery" className="">
             <TButton variant="link" size="default" className="flex gap-1">
               <span>Tquery</span>
               <Network size={12} strokeWidth={3} />
             </TButton>
-          </Link>
+          </Link> */}
           <Link to="/todos" className="">
             <TButton variant="plain" size="default" className="flex  gap-1">
               <span>Todos</span>
