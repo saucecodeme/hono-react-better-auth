@@ -30,9 +30,15 @@ export function Header() {
           <ListTodo size={12} strokeWidth={3} />
         </TButton>
       </Link>
-      <Link to="/auth" className="justify-self-end ml-auto">
+      <Link to="/signup" className="">
+        <TButton variant="plain" size="default" className="flex  gap-1">
+          <span>Sign Up</span>
+          <ListTodo size={12} strokeWidth={3} />
+        </TButton>
+      </Link>
+      <Link to="/signin" className="justify-self-end ml-auto">
         <TButton variant="default" size="default" className="flex  gap-1">
-          <span>Login</span>
+          <span>Sign In</span>
           <KeyRound size={12} strokeWidth={3} />
         </TButton>
       </Link>
