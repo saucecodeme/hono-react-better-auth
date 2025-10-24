@@ -12,7 +12,7 @@ export function Header() {
   const [isLoading, setIsLoading] = React.useState(false)
   const { data: session, isPending } = authClient.useSession()
 
-  const handleLogout = () => {
+  const handleSignout = () => {
     setIsLoading(true)
     try {
       authClient.signOut().then(() => {
@@ -83,7 +83,7 @@ export function Header() {
               variant="default"
               size="default"
               className="flex  gap-1"
-              onClick={handleLogout}
+              onClick={handleSignout}
             >
               <span>{isLoading ? 'Signing Out' : 'Sign Out'}</span>
               <KeyRound size={12} strokeWidth={3} />
