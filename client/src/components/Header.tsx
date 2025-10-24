@@ -1,12 +1,32 @@
+import * as React from 'react'
 import { Button as TButton } from '@/components/tui/button'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { House, BadgeInfo, Network, KeyRound, ListTodo } from 'lucide-react'
 import Logo from '../assets/logo/arc-logo.svg'
 import { authClient } from '../lib/auth-client'
+import { triggerToast } from '@/utils/sonner/triggerToast'
 
 export function Header() {
+  const router = useRouter()
   // check for the existed session
+  const [isLoading, setIsLoading] = React.useState(false)
   const { data: session, isPending } = authClient.useSession()
+
+  const handleLogout = () => {
+    setIsLoading(true)
+    try {
+      authClient.signOut().then(() => {
+        triggerToast('signout')
+        router.navigate({
+          to: '/',
+        })
+      })
+    } catch (error) {
+      console.error(`Sign Out failed: ${error}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   if (isPending) return
   if (session) {
@@ -18,9 +38,14 @@ export function Header() {
       <img src={Logo} className="w-6 h-6 mx-4" />
       {!isPending && (
         <>
-          <Link to="/" className="">
+          <Link to="/" activeProps={{ className: '' }} className="group/home">
             <TButton variant="plain" size="default" className="flex gap-1">
-              <span>Home</span> <House size={12} strokeWidth={3} />
+              <span>Home</span>{' '}
+              <House
+                size={12}
+                strokeWidth={3}
+                className="group-data-[status=active]/home:stroke-3"
+              />
             </TButton>
           </Link>{' '}
           <Link to="/about">
@@ -54,12 +79,15 @@ export function Header() {
             </TButton>
           </Link>
           {session && (
-            <Link to="/signout" className="justify-self-end">
-              <TButton variant="default" size="default" className="flex  gap-1">
-                <span>Sign Out</span>
-                <KeyRound size={12} strokeWidth={3} />
-              </TButton>
-            </Link>
+            <TButton
+              variant="default"
+              size="default"
+              className="flex  gap-1"
+              onClick={handleLogout}
+            >
+              <span>{isLoading ? 'Signing Out' : 'Sign Out'}</span>
+              <KeyRound size={12} strokeWidth={3} />
+            </TButton>
           )}
         </>
       )}
