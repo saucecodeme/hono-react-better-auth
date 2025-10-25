@@ -105,6 +105,7 @@
   --s-ring: #f38e89;
   --s-ring-alt: #3238fa;
   --s-success: #017872;
+  --s-accent: #456378;
 }
 
 .dark {
@@ -157,6 +158,7 @@
   --color-s-ring: var(--s-ring);
   --color-s-ring-alt: var(--s-ring-alt);
   --color-s-success: var(--s-success);
+  --color-s-accent: var(--s-accent);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
