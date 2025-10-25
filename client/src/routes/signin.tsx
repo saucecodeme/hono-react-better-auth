@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React from 'react'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/tui/button'
@@ -30,15 +30,20 @@ type ErrorState = Record<'email' | 'password' | 'form', string>
 function RouteComponent() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
-  const [errors, setErrors] = useState<ErrorState>({
+  const [errors, setErrors] = React.useState<ErrorState>({
     email: '',
     password: '',
     form: '',
   })
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  React.useEffect(() => {
+    if (session) {
+      router.navigate({ to: '/todos' })
+    }
+  }, [session, router])
 
   if (isPending) return <section className="route-starter"></section>
-  if (session) router.navigate({ to: '/todos' })
 
   const handleFormChange = (e: React.ChangeEvent<HTMLFormElement>) => {
     const form = e.currentTarget
