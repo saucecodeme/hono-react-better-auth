@@ -2,6 +2,21 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+
+    "moduleResolution": "bundler",
+    "module": "ESNext"
+    // "target": "ES2022"
+    // "esModuleInterop": true
   }
 }
+
+/* 
+The type info is collapsing to any because the TypeScript compiler never 
+manages to load Better Auth `.d.ts`
+
+moduleResolution defaults to the legacy “classic” mode, so re-exports 
+such as import '@better-auth/core/env' can’t be resolved. When TS can’t 
+resolve those modules it silently widens them to any, and the entire Auth type 
+including $Infer.Session.user—becomes any
+*/

@@ -1,7 +1,14 @@
 import * as React from 'react'
 import { Button as TButton } from '@/components/tui/button'
 import { Link, useRouter } from '@tanstack/react-router'
-import { House, BadgeInfo, Network, KeyRound, ListTodo } from 'lucide-react'
+import {
+  House,
+  BadgeInfo,
+  BadgeCheck,
+  LogOut,
+  ListTodo,
+  FolderLock,
+} from 'lucide-react'
 import Logo from '../assets/logo/arc-logo.svg'
 import { authClient } from '../lib/auth-client'
 import { triggerToast } from '@/utils/sonner/triggerToast'
@@ -17,7 +24,7 @@ export function Header() {
     setIsLoading(true)
     try {
       // Testing purpose
-      throw new Error('Something went wrong')
+      // throw new Error('Something went wrong')
       authClient.signOut().then(() => {
         triggerToast('signout')
         router.navigate({
@@ -68,10 +75,19 @@ export function Header() {
               <Network size={12} strokeWidth={3} />
             </TButton>
           </Link> */}
-          <Link to="/todos" className="">
-            <TButton variant="plain" size="default" className="flex  gap-1">
+          <Link to="/todos" className="" disabled={!session}>
+            <TButton
+              variant="plain"
+              size="default"
+              className="flex gap-1"
+              disabled={!session}
+            >
               <span>Todos</span>
-              <ListTodo size={12} strokeWidth={3} />
+              {!session ? (
+                <FolderLock size={12} strokeWidth={3} />
+              ) : (
+                <ListTodo size={12} strokeWidth={3} />
+              )}
             </TButton>
           </Link>
           <Link to="/signup" className="">
@@ -88,13 +104,13 @@ export function Header() {
               onClick={handleSignout}
             >
               <span>{isLoading ? 'Signing Out' : 'Sign Out'}</span>
-              <KeyRound size={12} strokeWidth={3} />
+              <LogOut size={12} strokeWidth={3} />
             </TButton>
           ) : (
             <Link to="/signin" className="justify-self-end ml-auto">
               <TButton variant="default" size="default" className="flex  gap-1">
                 <span>Sign In</span>
-                <KeyRound size={12} strokeWidth={3} />
+                <BadgeCheck size={12} strokeWidth={3} />
               </TButton>
             </Link>
           )}
