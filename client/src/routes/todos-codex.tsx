@@ -43,19 +43,19 @@ function RouteComponent() {
     setChecked(initial)
   }, [data])
 
-  React.useEffect(() => {
-    if (!session) {
-      router.navigate({ to: '/signin', replace: true })
-    }
-  }, [router, session])
+  // React.useEffect(() => {
+  //   if (!session) {
+  //     router.navigate({ to: '/signin', replace: true })
+  //   }
+  // }, [router, session])
 
-  React.useEffect(() => {
-    if (!isAdding) return
-    const animationFrame = requestAnimationFrame(() => {
-      newTodoInputRef.current?.focus()
-    })
-    return () => cancelAnimationFrame(animationFrame)
-  }, [isAdding])
+  // React.useEffect(() => {
+  //   if (!isAdding) return
+  //   const animationFrame = requestAnimationFrame(() => {
+  //     newTodoInputRef.current?.focus()
+  //   })
+  //   return () => cancelAnimationFrame(animationFrame)
+  // }, [isAdding])
 
   const midpoint = data ? Math.ceil(data.length / 2) : 0
   const upperTodos = data ? data.slice(0, midpoint) : []

@@ -96,6 +96,7 @@
 
   --s-background: #ffffff;
   --s-foreground: #fffcec;
+  --s-foreground-dark: #3c3b3a;
   --s-primary: #ffffff;
   --s-primary-foreground: #696969;
   --s-primary-foreground-unique: #3238fa;
@@ -149,6 +150,7 @@
   --font-marlin: 'Marlin', system-ui, sans-serif;
   --color-s-background: var(--s-background);
   --color-s-foreground: var(--s-foreground);
+  --color-s-foreground-dark: var(--s-foreground-dark);
   --color-s-primary: var(--s-primary);
   --color-s-primary-foreground: var(--s-primary-foreground);
   --color-s-primary-foreground-unique: var(--s-primary-foreground-unique);
