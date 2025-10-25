@@ -12,6 +12,8 @@ import { motion, useAnimationControls, AnimatePresence } from 'motion/react'
 import { Button as TButton } from '@/components/tui/button'
 import { Input as TInput } from '@/components/tui/input'
 import { v4 as uuid } from 'uuid'
+import { useCreateTodo } from '@/utils/tanstack-query/useMutation'
+import { title } from 'process'
 
 const client = hc<AppType>('/')
 
@@ -40,13 +42,21 @@ function RouteComponent() {
   const newTodoInputRef = React.useRef<HTMLInputElement>(null)
   const listControls = useAnimationControls()
   const formControls = useAnimationControls()
+  const createTodo = useCreateTodo()
 
   const handleToggleAdd = () => {
     setIsAdding((prev) => !prev)
     setNewTodoTitle('')
   }
 
-  type TodoForm = {}
+  React.useEffect(() => {
+    if (!isAdding) return
+    const animationFrame = requestAnimationFrame(() => {
+      newTodoInputRef.current?.focus()
+    })
+    return () => cancelAnimationFrame(animationFrame)
+  }, [isAdding])
+
   type NewToDo = {
     id: string
     userId: string
@@ -62,24 +72,30 @@ function RouteComponent() {
     const form = e.currentTarget
     const formData = new FormData(form)
     const formObj = Object.fromEntries(formData.entries()) as { title: string }
-    console.log(formObj)
-    const payload: NewToDo = {
-      id: uuid(),
-      userId: uuid(),
+    const newTodo = {
       title: formObj.title ?? '',
-      description: '',
-      // description: formObj.description?.trim() ? formObj.description : null,
-      completed: false,
-      createdAt: '',
-      updatedAt: '',
+      description: 'This is just a placeholder',
     }
 
     // send a post request to the backend
+    // ;(async () => {
+    //   try {
+    //     const res = await client.api.todos.$post({ json: payload })
+    //     if (!res.ok) {
+    //       console.error('Failed to create todo', await res.text())
+    //       return
+    //     }
+    //     const created = (await res.json()) as NewToDo
+    //     // Replace the optimistic item (matched by our generated id) with the server result
+    //     setLocalData((prev) =>
+    //       prev.map((t) => (t.id === payload.id ? created : t))
+    //     )
+    //   } catch (err) {
+    //     console.error('Error creating todo', err)
+    //   }
+    // })()
 
-    // payload now contains your form values as an object, e.g. payload.title
-    console.log('New todo payload:', payload)
-    setLocalData((prev) => [...prev, payload])
-
+    createTodo.mutate(newTodo)
     // reset form / UI
     form.reset()
     setNewTodoTitle('')
@@ -127,7 +143,7 @@ function RouteComponent() {
   return (
     <div className="route-starter">
       <div className="flex flex-col items-center gap-4">
-        <motion.div layout className="flex flex-col">
+        <motion.div layout className="flex flex-col-reverse">
           {status === 'success' &&
             localData.map((todo) => {
               const isChecked = checked[todo.id] ?? false
@@ -162,9 +178,13 @@ function RouteComponent() {
           {isAdding && (
             <motion.form
               className="w-full py-3 flex flex-row item-start gap-1.5"
-              initial={{ opacity: 0, y: 16, scale: 0.96 }}
+              // initial={{ opacity: 0, y: 16, scale: 0.96 }}
+              // animate={{ opacity: 1, y: 0, scale: 1 }}
+              // exit={{ opacity: 0, y: 16, scale: 0.98 }}
+
+              initial={{ opacity: 0, y: -16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              exit={{ opacity: 0, y: -16, scale: 0.98 }}
               transition={{
                 type: 'spring',
                 // stiffness: 200,

@@ -3,12 +3,13 @@ import { createTodo, getTodosByUserId } from "../db/queries";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { HonoEnv } from "../types";
 import { z } from "zod";
+import { todosInsertSchema, createTodoSchema } from "../types";
 
-const createTodoSchema = z.object({
-  title: z.string().min(1).max(500),
-  description: z.string().max(1000).optional(),
-  completed: z.boolean().default(false),
-});
+// const createTodoSchema = z.object({
+//   title: z.string().min(1).max(500),
+//   description: z.string().max(1000).optional(),
+//   completed: z.boolean().default(false),
+// });
 
 // when working with RPC you need to make sure that everything is chained
 
@@ -31,7 +32,8 @@ export const todos = new Hono<HonoEnv>()
     let body: unknown;
     try {
       body = await c.req.json();
-    } catch {
+    } catch (error) {
+      console.log("after add json", error);
       return c.json({ error: "Invalid JSON payload" }, 400);
     }
 
@@ -46,8 +48,17 @@ export const todos = new Hono<HonoEnv>()
     }
 
     try {
-      const todo = await createTodo(user.id, parsed.data);
-      return c.json(todo, 201);
+      // const todo = await createTodo(user.id, parsed.data);
+      const fakeTodo = {
+        id: 1,
+        userId: user.id,
+        title: parsed.data.title,
+        description: parsed.data.description || "",
+        completed: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return c.json(fakeTodo, 201);
     } catch (error) {
       console.error("Failed to create todo:", error);
       return c.json({ error: "Failed to create todo" }, 500);
