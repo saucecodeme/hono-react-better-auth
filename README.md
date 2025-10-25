@@ -9,6 +9,9 @@
 - Setup a query to fetch from backend
 - Setup hono routes
 - Setup Better Auth on the server side
+- Sign Up and Sign In page
+- Sign Out and improve Navbar (Show error toast on failed)
+- Protect the todos page
 
 ### Local Dev
 

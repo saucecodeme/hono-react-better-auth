@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import * as React from 'react'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/tui/button'
@@ -39,8 +39,8 @@ type SignUpForm = {
 function RouteComponent() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<ErrorState>({
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [errors, setErrors] = React.useState<ErrorState>({
     name: '',
     email: '',
     password: '',
@@ -48,13 +48,42 @@ function RouteComponent() {
     form: '',
   })
 
-  if (isPending) return <section className="route-starter"></section>
-  if (session) router.navigate({ to: '/todos' })
+  React.useEffect(() => {
+    if (session) {
+      router.navigate({ to: '/todos', replace: true })
+    }
+  }, [router, session])
+
+  const validationMessages = React.useMemo(() => {
+    return {
+      name: {
+        required: 'Name is required.',
+        pattern: 'Name can only include alphabetic characters.',
+        tooShort: 'Name must be at least 3 characters.',
+        tooLong: 'Name must be at most 30 characters.',
+      },
+      email: {
+        required: 'Email is required.',
+        invalid: 'Enter a valid email address.',
+      },
+      password: {
+        required: 'Password is required.',
+        pattern:
+          'Password can only include alphabetic characters, numbers, and @.',
+        tooShort: 'Password must be at least 6 characters.',
+        tooLong: 'Password must be at most 30 characters.',
+      },
+      confirm: {
+        mismatch: 'Password mismatched.',
+      },
+    }
+  }, [])
 
   const handleFormChange = (e: React.ChangeEvent<HTMLFormElement>) => {
     const form = e.currentTarget
     const focusedElementId = e.target.id
     const formData = new FormData(form)
+
     const nextValues = {
       name: (formData.get('name') as string) ?? '',
       email: (formData.get('email') as string) ?? '',
@@ -69,97 +98,88 @@ function RouteComponent() {
       form: '',
     }
 
-    // Name validation
     if (focusedElementId === 'name') {
       const nameInput = form.elements.namedItem(
         'name'
       ) as HTMLInputElement | null
       if (nameInput && !nameInput.validity.valid) {
         if (nameInput.validity.valueMissing) {
-          nextErrors.name = 'Name is required.'
+          nextErrors.name = validationMessages.name.required
         } else if (nameInput.validity.patternMismatch) {
-          nextErrors.name = 'Name can only include alphabetic characters.'
+          nextErrors.name = validationMessages.name.pattern
         } else if (nameInput.validity.tooShort) {
-          nextErrors.name = `Name must be at least ${nameInput.minLength} characters.`
+          nextErrors.name = validationMessages.name.tooShort
         } else if (nameInput.validity.tooLong) {
-          nextErrors.name = `Name must be at most ${nameInput.maxLength} characters.`
+          nextErrors.name = validationMessages.name.tooLong
         }
       }
     }
 
-    // Email validation
     if (focusedElementId === 'email') {
       const emailInput = form.elements.namedItem(
         'email'
       ) as HTMLInputElement | null
       if (emailInput && !emailInput.validity.valid) {
         nextErrors.email = emailInput.validity.valueMissing
-          ? 'Email is required.'
-          : 'Enter a valid email address.'
+          ? validationMessages.email.required
+          : validationMessages.email.invalid
       }
     }
 
-    // Password validation
     if (focusedElementId === 'password') {
       const passwordInput = form.elements.namedItem(
         'password'
       ) as HTMLInputElement | null
       if (passwordInput && !passwordInput.validity.valid) {
         if (passwordInput.validity.valueMissing) {
-          nextErrors.password = 'Password is required.'
+          nextErrors.password = validationMessages.password.required
         } else if (passwordInput.validity.patternMismatch) {
-          nextErrors.password =
-            'Password can only include alphabetic characters and numbers'
+          nextErrors.password = validationMessages.password.pattern
         } else if (passwordInput.validity.tooShort) {
-          nextErrors.password = `Password must be at least ${passwordInput.minLength} characters.`
+          nextErrors.password = validationMessages.password.tooShort
         } else if (passwordInput.validity.tooLong) {
-          nextErrors.password = `Password must be at most ${passwordInput.maxLength} characters.`
+          nextErrors.password = validationMessages.password.tooLong
         }
       }
     }
 
     if (focusedElementId === 'confirm') {
-      const confirmInput = form.elements.namedItem(
-        'confirm'
-      ) as HTMLInputElement | null
-      if (confirmInput) {
-        if (nextValues.password !== nextValues.confirm) {
-          nextErrors.confirm = 'Password mismatched'
-        }
+      if (nextValues.password !== nextValues.confirm) {
+        nextErrors.confirm = validationMessages.confirm.mismatch
       }
     }
-    // console.log(nextValues)
+
     setErrors(nextErrors)
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (Object.values(errors).join('')) {
+    if (Object.values(errors).some(Boolean)) {
       console.error(Object.values(errors).join(' / '))
       return
     }
-    setIsLoading(true)
 
     const form = e.currentTarget
     const formData = new FormData(form)
-    const signUpForm = Object.fromEntries(formData.entries()) as SignUpForm
-    const name = signUpForm.name
-    const email = signUpForm.email
-    const password = signUpForm.password
+    const { name, email, password, confirm } = Object.fromEntries(
+      formData.entries()
+    ) as SignUpForm
+
+    // confirm password validation
+    if (password !== confirm) {
+      setErrors((prev) => ({
+        ...prev,
+        confirm: validationMessages.confirm.mismatch,
+      }))
+      return
+    }
+
     try {
-      authClient.signUp
-        .email({
-          name,
-          email,
-          password,
-        })
-        .then(() => {
-          form.reset()
-          router.navigate({
-            to: '/todos',
-          })
-        })
+      setIsLoading(true)
+      await authClient.signUp.email({ name, email, password })
+      form.reset()
+      router.navigate({ to: '/todos' })
     } catch (error) {
       setErrors((prev) => ({ ...prev, form: 'An unexpected error occured' }))
       console.error(`Sign Up failed: ${error}`)
@@ -167,6 +187,8 @@ function RouteComponent() {
       setIsLoading(false)
     }
   }
+
+  if (isPending) return <section className="route-starter"></section>
 
   return (
     <section className="route-starter flex flex-col gap-4">
@@ -253,7 +275,7 @@ function RouteComponent() {
           aria-label="Form submission status"
           className={`warning-message text-nowrap ${errors.form ? 'opacity-100' : 'opacity-0 sr-only'}`}
         >
-          {errors.form && `${errors.form}`}
+          {errors.form}
         </span>
       </div>
 
