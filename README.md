@@ -12,6 +12,8 @@
 - Sign Up and Sign In page
 - Sign Out and improve Navbar (Show error toast on failed)
 - Protect the todos page
+- Generate & Migrate a new db schema -> Seed
+- Auth middleware
 
 ### Local Dev
 
