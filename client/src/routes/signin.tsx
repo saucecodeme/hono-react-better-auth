@@ -3,7 +3,7 @@ import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/tui/button'
 import { Input as TInput } from '@/components/tui/input'
-import { LogIn } from 'lucide-react'
+import { BadgeCheck } from 'lucide-react'
 import { authClient } from '../lib/auth-client'
 
 export const Route = createFileRoute('/signin')({
@@ -122,7 +122,7 @@ function RouteComponent() {
     <section className="route-starter flex flex-col gap-4">
       <div className="w-[250px] flex flex-col gap-5">
         <div className="flex items-center gap-2">
-          <LogIn size={20} strokeWidth={3} />
+          <BadgeCheck size={20} strokeWidth={3} />
           <h2>Sign in to your account</h2>
         </div>
         <form

@@ -4,7 +4,7 @@ import { db } from "../db/db";
 import * as schema from "../db/schema";
 import { openAPI } from "better-auth/plugins";
 
-export const auth = betterAuth({
+const betterAuthOptions = {
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: schema,
@@ -14,4 +14,6 @@ export const auth = betterAuth({
   },
   trustedOrigins: [process.env.CLIENT_URL!],
   plugins: [openAPI()],
-});
+};
+
+export const auth = betterAuth(betterAuthOptions);

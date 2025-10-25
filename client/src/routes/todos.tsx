@@ -1,10 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router'
+import * as React from 'react'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { hc } from 'hono/client'
 import type { AppType } from '../../../server'
 import { useQuery } from '@tanstack/react-query'
-import { Database, BadgeAlert } from 'lucide-react'
+import { BadgeAlert } from 'lucide-react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
+import { authClient } from '@/lib/auth-client'
 
 const client = hc<AppType>('/')
 
@@ -13,7 +15,10 @@ export const Route = createFileRoute('/todos')({
 })
 
 function RouteComponent() {
-  const { data, isLoading, isError, error, status } = useQuery({
+  const { data: session } = authClient.useSession()
+  const router = useRouter()
+
+  const { data, isLoading, error, status } = useQuery({
     queryKey: ['todos'],
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -22,6 +27,12 @@ function RouteComponent() {
       return res.json()
     },
   })
+
+  React.useEffect(() => {
+    if (!session) {
+      router.navigate({ to: '/signin', replace: true })
+    }
+  }, [router, session])
 
   if (isLoading)
     return (
