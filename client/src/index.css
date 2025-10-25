@@ -260,7 +260,7 @@
     position: absolute;
     inset-inline-start: 50%;
     inset-block-end: 0;
-    bottom: 4px;
+    bottom: 5px;
     height: 1.5px;
     width: 70%;
     /* transform-origin: left; */

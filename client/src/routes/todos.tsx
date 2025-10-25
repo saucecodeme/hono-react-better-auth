@@ -7,6 +7,7 @@ import { BadgeAlert } from 'lucide-react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
+import { motion } from 'motion/react'
 
 const client = hc<AppType>('/')
 
@@ -17,7 +18,6 @@ export const Route = createFileRoute('/todos')({
 function RouteComponent() {
   const { data: session } = authClient.useSession()
   const router = useRouter()
-
   const { data, isLoading, error, status } = useQuery({
     queryKey: ['todos'],
     queryFn: async () => {
@@ -27,6 +27,15 @@ function RouteComponent() {
       return res.json()
     },
   })
+  const [checked, setChecked] = React.useState<Record<string, boolean>>({})
+
+  React.useEffect(() => {
+    if (!data) return
+    const initial = Object.fromEntries(
+      data.map((d) => [String(d.id), !!d.completed])
+    ) as Record<string, boolean>
+    setChecked(initial)
+  }, [data])
 
   React.useEffect(() => {
     if (!session) {
@@ -42,7 +51,7 @@ function RouteComponent() {
           {[...Array(10).keys()].map((id) => {
             return (
               <div key={id} className="flex gap-2 items-center opacity-30">
-                <Skeleton className="size-4 shrink-0 rounded-[4px]" />
+                <Skeleton className="size-4 shrink-0 rounded-lg" />
                 <Skeleton className="w-full h-4" />
               </div>
             )
@@ -62,11 +71,38 @@ function RouteComponent() {
       <div className="flex flex-col">
         {status === 'success' &&
           data.map((todo) => {
+            const isChecked = checked[todo.id] ?? false
             return (
-              <div key={todo.id} className="flex gap-2 items-center">
-                <TCheckbox />
-                <div>{todo.title}</div>
-              </div>
+              <motion.label
+                key={todo.id}
+                layout
+                className="flex items-center gap-2 rounded-md px-2 py-1"
+                transition={{
+                  type: 'spring',
+                  stiffness: 380,
+                  damping: 32,
+                }}
+              >
+                <TCheckbox
+                  checked={checked[todo.id]}
+                  onCheckedChange={(value) =>
+                    setChecked((prev) => ({
+                      ...prev,
+                      [todo.id]: value === true,
+                    }))
+                  }
+                />
+                <span className="relative inline-block">
+                  <span>{todo.title}</span>
+                  <motion.span
+                    className="pointer-events-none absolute left-0 right-0 top-1/2 h-0.5 bg-current"
+                    initial={false}
+                    animate={{ scaleX: isChecked ? 1 : 0 }}
+                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                    style={{ transformOrigin: 'left center' }}
+                  />
+                </span>
+              </motion.label>
             )
           })}
       </div>
