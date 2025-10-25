@@ -9,12 +9,15 @@ import { triggerToast } from '@/utils/sonner/triggerToast'
 export function Header() {
   const router = useRouter()
   // check for the existed session
+  const [error, setError] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const { data: session, isPending } = authClient.useSession()
 
   const handleSignout = () => {
     setIsLoading(true)
     try {
+      // Testing purpose
+      throw new Error('Something went wrong')
       authClient.signOut().then(() => {
         triggerToast('signout')
         router.navigate({
@@ -23,15 +26,20 @@ export function Header() {
       })
     } catch (error) {
       console.error(`Sign Out failed: ${error}`)
+      setError(error instanceof Error ? error.message : 'Unknown error')
     } finally {
       setIsLoading(false)
     }
   }
 
+  React.useEffect(() => {
+    if (error) {
+      triggerToast('offline', error)
+      setError(null)
+    }
+  }, [error])
+
   if (isPending) return
-  if (session) {
-    console.log(session)
-  }
 
   return (
     <div className="fixed top-0 left-0 p-6 w-full flex justify-start items-center gap-2 bg-[#456378] backdrop-opacity-30">
@@ -72,22 +80,23 @@ export function Header() {
               <ListTodo size={12} strokeWidth={3} />
             </TButton>
           </Link>
-          <Link to="/signin" className="justify-self-end ml-auto">
-            <TButton variant="default" size="default" className="flex  gap-1">
-              <span>Sign In</span>
-              <KeyRound size={12} strokeWidth={3} />
-            </TButton>
-          </Link>
-          {session && (
+          {session ? (
             <TButton
               variant="default"
               size="default"
-              className="flex  gap-1"
+              className="flex gap-1 justify-self-end ml-auto"
               onClick={handleSignout}
             >
               <span>{isLoading ? 'Signing Out' : 'Sign Out'}</span>
               <KeyRound size={12} strokeWidth={3} />
             </TButton>
+          ) : (
+            <Link to="/signin" className="justify-self-end ml-auto">
+              <TButton variant="default" size="default" className="flex  gap-1">
+                <span>Sign In</span>
+                <KeyRound size={12} strokeWidth={3} />
+              </TButton>
+            </Link>
           )}
         </>
       )}

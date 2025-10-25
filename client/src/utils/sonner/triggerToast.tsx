@@ -24,13 +24,13 @@ const toastConfig: Record<TriggerCase, ToastConfig> = {
   },
 }
 
-export function triggerToast(triggerCase: TriggerCase) {
+export function triggerToast(triggerCase: TriggerCase, customMessage = '') {
   const config = toastConfig[triggerCase]
   if (!config) return
 
   const Icon = config.icon
 
-  toast(config.message, {
+  toast(customMessage ? customMessage : config.message, {
     icon: <Icon size={16} strokeWidth={3} />,
   })
 }
