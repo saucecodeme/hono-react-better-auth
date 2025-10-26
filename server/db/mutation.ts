@@ -50,3 +50,11 @@ export const patchTodo = async (
 
   return todo ?? null;
 };
+
+export const deleteTodo = async (userId: string, todoId: string) => {
+  const [todo] = await db
+    .delete(todos)
+    .where(and(eq(todos.id, todoId), eq(todos.userId, userId)))
+    .returning();
+  return todo ?? null;
+};

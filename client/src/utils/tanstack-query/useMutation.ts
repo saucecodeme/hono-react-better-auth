@@ -53,3 +53,18 @@ export function usePatchTodo() {
     },
   })
 }
+
+export function useDeleteTodo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await client.api.todos[':id'].$delete({
+        param: { id },
+      })
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+}
