@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { hc } from 'hono/client'
 import type { AppType } from '../../../../server'
-import type { CreateTodo } from '../../../../server/types'
+import type { CreateTodo, PatchTodo } from '../../../../server/types'
 
 const client = hc<AppType>('/')
 
@@ -30,6 +30,22 @@ export function useCreateTodo() {
   return useMutation({
     mutationFn: async (newTodo: CreateTodo) => {
       const res = await client.api.todos.$post({ json: newTodo })
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+}
+
+export function usePatchTodo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: PatchTodo }) => {
+      const res = await client.api.todos[':id'].$patch({
+        param: { id },
+        json: data,
+      })
       return res.json()
     },
     onSuccess: () => {

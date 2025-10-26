@@ -1,8 +1,8 @@
 import type { ComponentType } from 'react'
 import { toast } from 'sonner'
-import { Unplug, BadgeCheck } from 'lucide-react'
+import { Unplug, BadgeCheck, Bug } from 'lucide-react'
 
-type TriggerCase = 'signin' | 'signout' | 'offline'
+type TriggerCase = 'signin' | 'signout' | 'offline' | 'error'
 
 type ToastConfig = {
   message: string
@@ -21,6 +21,10 @@ const toastConfig: Record<TriggerCase, ToastConfig> = {
   offline: {
     message: 'You appear to be offline.',
     icon: Unplug,
+  },
+  error: {
+    message: 'An unexpected errors occured',
+    icon: Bug,
   },
 }
 
