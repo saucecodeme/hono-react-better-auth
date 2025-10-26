@@ -11,7 +11,11 @@ import { motion } from 'motion/react'
 // import { useAnimationControls, AnimatePresence } from 'motion/react'
 import { Button as TButton } from '@/components/tui/button'
 import { Input as TInput } from '@/components/tui/input'
-import { useCreateTodo, usePatchTodo } from '@/utils/tanstack-query/useMutation'
+import {
+  useCreateTodo,
+  usePatchTodo,
+  useDeleteTodo,
+} from '@/utils/tanstack-query/useMutation'
 import { createTodoSchema, patchTodoSchema } from '../../../server/types'
 import z from 'zod'
 import { triggerToast } from '@/utils/sonner/triggerToast'
@@ -48,6 +52,7 @@ function RouteComponent() {
   const editingInputRef = React.useRef<HTMLInputElement>(null)
   const createTodo = useCreateTodo()
   const patchTodo = usePatchTodo()
+  const deleteTodo = useDeleteTodo()
   const clickTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
@@ -92,6 +97,18 @@ function RouteComponent() {
     }
 
     createTodo.mutate(parsed.data)
+    setLocalData((prev) => [
+      {
+        id: '',
+        userId: '',
+        title: parsed.data.title,
+        description: parsed.data.description ?? '',
+        completed: false,
+        createdAt: '',
+        updatedAt: '',
+      },
+      ...prev,
+    ])
     form.reset()
     setIsAdding(false)
   }
@@ -143,6 +160,8 @@ function RouteComponent() {
     if (!editingTodoId) return
     const trimmed = editingValue.trim() // Remove unnecessary whitespace
     if (trimmed.length === 0) {
+      deleteTodo.mutate(editingTodoId)
+      setLocalData((prev) => prev.filter((todo) => todo.id !== editingTodoId))
       handleEditCancel()
       return
     }
@@ -152,6 +171,7 @@ function RouteComponent() {
         todo.id === editingTodoId ? { ...todo, title: trimmed } : todo
       )
     )
+
     // Patch todo
     const editedTodo = localData.find((todo) => todo.id === editingTodoId)!
     const parsed = patchTodoSchema.safeParse({ title: trimmed })
@@ -159,16 +179,21 @@ function RouteComponent() {
       if (!parsed.success) {
         const tree = z.treeifyError(parsed.error)
         setPatchError(tree.errors[0] ?? 'Invalid input')
-        setEditingTodoId(null)
-        setEditingValue('')
+        handleEditCancel()
         return
       }
       patchTodo.mutate({ id: editingTodoId, data: parsed.data })
     }
 
-    setEditingTodoId(null)
-    setEditingValue('')
-  }, [editingTodoId, editingValue, handleEditCancel, patchTodo, localData])
+    handleEditCancel()
+  }, [
+    editingTodoId,
+    editingValue,
+    handleEditCancel,
+    patchTodo,
+    deleteTodo,
+    localData,
+  ])
 
   const handleEditInputChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

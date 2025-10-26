@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { getTodosByUserId } from "../db/queries";
-import { createTodo, patchTodo } from "../db/mutation";
+import { createTodo, patchTodo, deleteTodo } from "../db/mutation";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { HonoEnv } from "../types";
 import { z } from "zod";
@@ -94,7 +94,21 @@ export const todos = new Hono<HonoEnv>()
 
       return c.json(todo, 200);
     } catch (error) {
-      console.error("Failed to update todo:", error);
+      console.error("Failed to update todo: ", error);
       return c.json({ error: "Failed to update todo" }, 500);
+    }
+  })
+  .delete("/:id", async (c) => {
+    const user = c.get("user");
+    const id = c.req.param("id");
+    try {
+      const todo = await deleteTodo(user.id, id);
+      if (!todo) {
+        return c.json({ error: "Todo not found" }, 404);
+      }
+      return c.json(todo, 200);
+    } catch (error) {
+      console.error("Failed to delete todo: ", error);
+      return c.json({ error: "Failed to delete todo" }, 500);
     }
   });

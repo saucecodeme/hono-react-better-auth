@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TqueryRouteImport } from './routes/tquery'
-import { Route as TodosCodexRouteImport } from './routes/todos-codex'
 import { Route as TodosRouteImport } from './routes/todos'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SignoutRouteImport } from './routes/signout'
@@ -22,11 +21,6 @@ import { Route as IndexRouteImport } from './routes/index'
 const TqueryRoute = TqueryRouteImport.update({
   id: '/tquery',
   path: '/tquery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TodosCodexRoute = TodosCodexRouteImport.update({
-  id: '/todos-codex',
-  path: '/todos-codex',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TodosRoute = TodosRouteImport.update({
@@ -73,7 +67,6 @@ export interface FileRoutesByFullPath {
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/todos': typeof TodosRoute
-  '/todos-codex': typeof TodosCodexRoute
   '/tquery': typeof TqueryRoute
 }
 export interface FileRoutesByTo {
@@ -84,7 +77,6 @@ export interface FileRoutesByTo {
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/todos': typeof TodosRoute
-  '/todos-codex': typeof TodosCodexRoute
   '/tquery': typeof TqueryRoute
 }
 export interface FileRoutesById {
@@ -96,7 +88,6 @@ export interface FileRoutesById {
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/todos': typeof TodosRoute
-  '/todos-codex': typeof TodosCodexRoute
   '/tquery': typeof TqueryRoute
 }
 export interface FileRouteTypes {
@@ -109,7 +100,6 @@ export interface FileRouteTypes {
     | '/signout'
     | '/signup'
     | '/todos'
-    | '/todos-codex'
     | '/tquery'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -120,7 +110,6 @@ export interface FileRouteTypes {
     | '/signout'
     | '/signup'
     | '/todos'
-    | '/todos-codex'
     | '/tquery'
   id:
     | '__root__'
@@ -131,7 +120,6 @@ export interface FileRouteTypes {
     | '/signout'
     | '/signup'
     | '/todos'
-    | '/todos-codex'
     | '/tquery'
   fileRoutesById: FileRoutesById
 }
@@ -143,7 +131,6 @@ export interface RootRouteChildren {
   SignoutRoute: typeof SignoutRoute
   SignupRoute: typeof SignupRoute
   TodosRoute: typeof TodosRoute
-  TodosCodexRoute: typeof TodosCodexRoute
   TqueryRoute: typeof TqueryRoute
 }
 
@@ -154,13 +141,6 @@ declare module '@tanstack/react-router' {
       path: '/tquery'
       fullPath: '/tquery'
       preLoaderRoute: typeof TqueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/todos-codex': {
-      id: '/todos-codex'
-      path: '/todos-codex'
-      fullPath: '/todos-codex'
-      preLoaderRoute: typeof TodosCodexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/todos': {
@@ -223,7 +203,6 @@ const rootRouteChildren: RootRouteChildren = {
   SignoutRoute: SignoutRoute,
   SignupRoute: SignupRoute,
   TodosRoute: TodosRoute,
-  TodosCodexRoute: TodosCodexRoute,
   TqueryRoute: TqueryRoute,
 }
 export const routeTree = rootRouteImport
