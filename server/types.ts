@@ -11,6 +11,12 @@ export type HonoEnv = {
   };
 };
 
+export type Todo = typeof todos.$inferSelect;
+export type TodoQuery = Omit<Todo, "createdAt" | "updatedAt"> & {
+  createdAt: string;
+  updatedAt: string;
+};
+
 // Zod schemas from Drizzle ORM schemas
 export const todosInsertSchema = createInsertSchema(todos);
 export const createTodoSchema = todosInsertSchema

@@ -14,9 +14,9 @@ export const todos = pgTable("todos", {
     .references(() => user.id, { onDelete: "cascade" }),
   title: varchar({ length: 500 }).notNull(),
   description: varchar({ length: 1000 }),
-  completed: boolean().default(false),
-  createdAt: timestamp({ withTimezone: true }).defaultNow(),
-  updatedAt: timestamp({ withTimezone: true }).defaultNow(),
+  completed: boolean().notNull().default(false),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
 export const user = pgTable("user", {
