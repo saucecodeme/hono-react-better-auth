@@ -96,6 +96,7 @@
 
   --s-background: #ffffff;
   --s-foreground: #fffcec;
+  --s-foreground-dark: #3c3b3a;
   --s-primary: #ffffff;
   --s-primary-foreground: #696969;
   --s-primary-foreground-unique: #3238fa;
@@ -149,6 +150,7 @@
   --font-marlin: 'Marlin', system-ui, sans-serif;
   --color-s-background: var(--s-background);
   --color-s-foreground: var(--s-foreground);
+  --color-s-foreground-dark: var(--s-foreground-dark);
   --color-s-primary: var(--s-primary);
   --color-s-primary-foreground: var(--s-primary-foreground);
   --color-s-primary-foreground-unique: var(--s-primary-foreground-unique);
@@ -210,6 +212,7 @@
     box-sizing: border-box;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
+    user-select: none;
     /* -webkit-font-smoothing: antialiased; */
     -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -260,7 +263,7 @@
     position: absolute;
     inset-inline-start: 50%;
     inset-block-end: 0;
-    bottom: 4px;
+    bottom: 5px;
     height: 1.5px;
     width: 70%;
     /* transform-origin: left; */

@@ -7,5 +7,9 @@ export const getTodos = async () => {
 };
 
 export const getTodosByUserId = async (userId: string) => {
-  return await db.select().from(todos).where(eq(todos.userId, userId)).orderBy(desc(todos.createdAt));
+  return await db
+    .select()
+    .from(todos)
+    .where(eq(todos.userId, userId))
+    .orderBy(desc(todos.createdAt));
 };
