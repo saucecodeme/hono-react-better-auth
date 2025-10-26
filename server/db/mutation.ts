@@ -50,3 +50,5 @@ export const patchTodo = async (
 
   return todo ?? null;
 };
+
+export const deleteTodo = async () => {};
