@@ -57,6 +57,8 @@ function RouteComponent() {
     null
   )
 
+  const todos = React.useMemo(() => data ?? [], [data]) // ?? nullish coalescing operator
+
   const handleToggleAdd = () => {
     setIsAdding((prev) => !prev)
   }
