@@ -4,21 +4,24 @@ import { TanstackQueryDevtools } from '../integration/tanstack-query/query-devto
 import { Header } from '../components/Header'
 import { Toaster as Sonner } from 'sonner'
 
+const toastOptions = {
+  className:
+    '!bg-s-accent !border-1 !text-s-foreground !w-fit !px-6 !select-none',
+}
+
 const RootLayout = () => (
   <>
-    <Sonner
-      toastOptions={{
-        className:
-          '!bg-s-accent !border-1 !text-s-foreground !w-fit !px-6 !select-none',
-      }}
-    />
+    <Sonner toastOptions={toastOptions} />
     <Header />
-    <div className="px-10 h-[calc(100vh)]">
-      <div className="bg-noise" />
+    <div className="h-screen bg-noise-container">
       <Outlet />
     </div>
-    <TanStackRouterDevtools />
-    <TanstackQueryDevtools />
+    {import.meta.env.DEV && (
+      <>
+        <TanstackQueryDevtools />
+        <TanStackRouterDevtools />
+      </>
+    )}
   </>
 )
 
