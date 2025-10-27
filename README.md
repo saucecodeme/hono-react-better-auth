@@ -14,6 +14,8 @@
 - Protect the todos page
 - Generate & Migrate a new db schema -> Seed
 - Auth middleware
+- ...
+- Create prod db with Neon
 
 ### Local Dev
 
