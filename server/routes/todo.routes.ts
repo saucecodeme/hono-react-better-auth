@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getTodosByUserId } from "../db/queries";
 import { createTodo, patchTodo, deleteTodo } from "../db/mutation";
 import { authMiddleware } from "../middleware/auth.middleware";
-import { HonoEnv } from "../types";
+import type { HonoEnv } from "../types";
 import { z } from "zod";
 import { createTodoSchema, patchTodoSchema } from "../types";
 import { zValidator } from "@hono/zod-validator";

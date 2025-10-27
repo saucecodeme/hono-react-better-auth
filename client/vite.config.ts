@@ -19,16 +19,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // That tells both the dev optimizer and the production build (Rollup)
-  // to treat the module as external instead of rolling it into the bundle.
-  optimizeDeps: {
-    exclude: ['better-auth/react'],
-  },
-  build: {
-    rollupOptions: {
-      external: ['better-auth/react'],
-    },
-  },
   server: {
     proxy: {
       '/api': {
