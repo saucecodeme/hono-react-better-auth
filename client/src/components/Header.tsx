@@ -1,14 +1,7 @@
 import * as React from 'react'
 import { Button as TButton } from '@/components/tui/button'
 import { Link, useRouter } from '@tanstack/react-router'
-import {
-  House,
-  BadgeInfo,
-  BadgeCheck,
-  LogOut,
-  ListTodo,
-  FolderLock,
-} from 'lucide-react'
+import { House, BadgeCheck, LogOut, ListTodo, FolderLock } from 'lucide-react'
 import Logo from '../assets/logo/arc-logo.svg'
 import { authClient } from '../lib/auth-client'
 import { triggerToast } from '@/utils/sonner/triggerToast'
