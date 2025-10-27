@@ -1,41 +1,22 @@
-# syntax = docker/dockerfile:1
-
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.18.0
-FROM node:${NODE_VERSION}-slim as base
-
-LABEL fly_launch_runtime="NodeJS"
-
-# NodeJS app lives here
+FROM oven/bun:latest AS base
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV=production
+FROM base AS build
+COPY package.json bun.lock ./
+COPY client/package.json client/bun.lock ./client/
+RUN bun install 
+WORKDIR /app/client
+RUN bun install
+WORKDIR /app
+COPY . .
+RUN bun run build
 
+FROM oven/bun:latest AS release
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/client/dist ./client
+COPY package.json bun.lock ./
+RUN bun install --production
 
-# Throw-away build stage to reduce size of final image
-FROM base as build
-
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
-
-# Install node modules
-COPY --link package.json .
-RUN npm install --production=false
-
-# Copy application code
-COPY --link . .
-
-# Remove development dependencies
-RUN npm prune --production
-
-
-# Final stage for app image
-FROM base
-
-# Copy built application
-COPY --from=build /app /app
-
-# Start the server by default, this can be overwritten at runtime
-CMD [ "npm", "run", "start" ]
+EXPOSE 3000
+CMD ["bun", "run", "start"]

@@ -9,9 +9,10 @@ const app = new Hono();
 
 const router = app
   .use(logger())
-  .use("/*", serveStatic({ root: "./client/dist" }))
+  .use("/*", serveStatic({ root: "./client" }))
   .on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw))
-  .route("/api/todos", todos);
+  .route("/api/todos", todos)
+  .get("*", serveStatic({ path: "./client/index.html" }));
 
 export type AppType = typeof router;
 export default app;

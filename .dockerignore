@@ -1,5 +1,12 @@
 fly.toml
-Dockerfile
-.dockerignore
-node_modules
 .git
+.github
+.env
+.vscode
+node_modules
+client/node_modules
+dist
+client/dist
+build
+scripts
+docker-compose.yaml
