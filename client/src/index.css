@@ -1,62 +1,24 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-/* @plugin "daisyui" {
-  themes: abyss --default;
-} */
 
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
-  font-family: 'Averta';
-  src: url('./assets/fonts/averta-regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Averta';
-  src: url('./assets/fonts/averta-semi-bold.woff2') format('woff2');
-  font-weight: 600;
-}
-@font-face {
-  font-family: 'Averta';
-  src: url('./assets/fonts/averta-bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-}
-@font-face {
   font-family: 'Marlin';
-  src: url('./assets/fonts/marlin-regular.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Marlin';
-  src: url('./assets/fonts/marlin-medium.otf') format('opentype');
+  src: url('./assets/fonts/medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
 }
 @font-face {
   font-family: 'Marlin';
-  src: url('./assets/fonts/marlin-bold.otf') format('opentype');
+  src: url('./assets/fonts/bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
 }
 @font-face {
   font-family: 'Marlin';
-  src: url('./assets/fonts/marlin-bold-italic.otf') format('opentype');
+  src: url('./assets/fonts/bold.woff2') format('woff2');
   font-weight: 700;
-  font-style: italic;
-}
-@font-face {
-  font-family: 'Marlin';
-  src: url('./assets/fonts/marlin-black.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Marlin';
-  src: url('./assets/fonts/marlin-black-italic.otf') format('opentype');
-  font-weight: 900;
   font-style: italic;
 }
 
@@ -225,7 +187,7 @@
 
 @layer utilities {
   .bt {
-    @apply border-1 border-foreground/80;
+    @apply border border-foreground/80;
   }
 }
 
@@ -239,14 +201,15 @@
   background-image: url('./assets/nav/arc.svg');
 }
 
-.bg-noise {
+.bg-noise-container::before {
+  content: '';
   position: absolute;
+  inset: 0;
+  background: url('./assets/noise-light.webp') rgb(54, 86, 107);
+  background-repeat: repeat;
+  background-size: auto;
+  pointer-events: none;
   z-index: -1;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('./assets/noise-light.png') rgb(54, 86, 107);
 }
 
 @layer components {

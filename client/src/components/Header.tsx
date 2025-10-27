@@ -49,11 +49,17 @@ export function Header() {
   if (isPending) return
 
   return (
-    <div className="fixed top-0 left-0 p-6 w-full flex justify-start items-center gap-2 bg-[#456378] backdrop-opacity-30">
-      <img src={Logo} className="w-6 h-6 mx-4" />
+    <div className="fixed inset-x-0 left-0 p-6 w-full flex justify-start items-center gap-2 bg-s-accent">
+      <img
+        src={Logo}
+        alt="Auths Logo"
+        className="w-6 h-6 mx-4"
+        loading="eager"
+        decoding="async"
+      />
       {!isPending && (
         <>
-          <Link to="/" activeProps={{ className: '' }} className="group/home">
+          <Link to="/" className="group/home">
             <TButton variant="plain" size="default" className="flex gap-1">
               <span>Home</span>{' '}
               <House
@@ -62,19 +68,7 @@ export function Header() {
                 className="group-data-[status=active]/home:stroke-3"
               />
             </TButton>
-          </Link>{' '}
-          <Link to="/about">
-            <TButton variant="plain" size="default" className="flex gap-1">
-              <span>About</span>
-              <BadgeInfo size={12} strokeWidth={3} />
-            </TButton>
           </Link>
-          {/* <Link to="/tquery" className="">
-            <TButton variant="link" size="default" className="flex gap-1">
-              <span>Tquery</span>
-              <Network size={12} strokeWidth={3} />
-            </TButton>
-          </Link> */}
           <Link to="/todos" className="" disabled={!session}>
             <TButton
               variant="plain"
@@ -88,12 +82,6 @@ export function Header() {
               ) : (
                 <ListTodo size={12} strokeWidth={3} />
               )}
-            </TButton>
-          </Link>
-          <Link to="/signup" className="">
-            <TButton variant="plain" size="default" className="flex  gap-1">
-              <span>Sign Up</span>
-              <ListTodo size={12} strokeWidth={3} />
             </TButton>
           </Link>
           {session ? (
