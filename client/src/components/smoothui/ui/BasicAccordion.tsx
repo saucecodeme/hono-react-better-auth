@@ -54,7 +54,7 @@ export default function BasicAccordion({
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <ChevronDown className="h-5 w-5" />
               </motion.div>

@@ -3,6 +3,7 @@ import type { TodoQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput } from '@/components/tui/input'
+import { useEffect, useRef } from 'react'
 
 export interface TodoComponentProps {
   todo: TodoQuery
@@ -33,6 +34,21 @@ export const TodoComponent = React.forwardRef<
     ref
   ) => {
     // console.log('todo:', todo)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+    const autoResizeTextarea = () => {
+      const textarea = textareaRef.current
+      if (textarea) {
+        textarea.style.height = 'auto'
+        textarea.style.height = `${textarea.scrollHeight}px`
+      }
+    }
+
+    useEffect(() => {
+      if (isEditing) {
+        autoResizeTextarea()
+      }
+    }, [isEditing, editingTodo.description])
 
     // const handleFormChange = (e: React.FormEvent<HTMLFormElement>) => {
     //   console.log()
@@ -47,7 +63,7 @@ export const TodoComponent = React.forwardRef<
         <motion.form
           layout
           // ref={ref}
-          className={`min-w-[250px] h-fit px-2 flex flex-col items-start justify-start rounded-md \
+          className={`w-[300px] h-fit px-2 flex flex-col items-start justify-start rounded-lg \
             ${isEditing ? '' : ''}`}
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
           onChange={handleEditInputChange}
@@ -78,8 +94,8 @@ export const TodoComponent = React.forwardRef<
                 className="w-full rounded-none"
               />
             ) : (
-              <div className="relative w-fit">
-                <p>{todo.title}</p>
+              <div className="relative min-w-0">
+                <p className="truncate">{todo.title}</p>
                 <motion.span
                   className="pointer-events-none absolute left-0 right-0 top-1/2 h-0.5 bg-current"
                   initial={false}
@@ -103,17 +119,17 @@ export const TodoComponent = React.forwardRef<
                   height: 0,
                   opacity: 0,
                 }}
-                className="overflow-hidden ml-6 w-[200px] text-s-foreground/70 text-sm font-normal"
+                className="overflow-hidden pl-6 w-full text-s-foreground/70 text-sm font-normal"
               >
-                {/* <p className="mt-2">{todo.description}</p> */}
                 <textarea
+                  ref={textareaRef}
                   id={`desc-${todo.id}`}
                   name="description"
-                  // rows={1}
-                  className="my-1 mb-3 w-full text-sm outline-none resize-none"
-                  // value={editingTodo.description ?? ''}
+                  className="my-1 mb-3 w-full text-sm outline-none resize-none overflow-hidden"
                   defaultValue={editingTodo.description ?? ''}
                   placeholder="Notes"
+                  onChange={autoResizeTextarea}
+                  style={{ minHeight: '24px' }}
                 />
               </motion.div>
             )}

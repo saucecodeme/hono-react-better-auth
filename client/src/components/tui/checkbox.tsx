@@ -12,7 +12,7 @@ export function Checkbox({
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        'peer size-4 shrink-0 bg-s-input border-s-input rounded-[4px] dark:bg-input/30  \
+        'peer size-4 shrink-0 bg-s-input border-s-input rounded-sm dark:bg-input/30  \
         data-[state=checked]:bg-s-destructive data-[state=checked]:text-primary-foreground \
         dark:data-[state=checked]:bg-primary data-[state=checked]:border-s-destructive \
         shadow-xs outline-none will-change-auto transition-all duration-200 ease-in-out \

@@ -238,7 +238,8 @@
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .link-hover:hover::after {
+  .link-hover:hover::after,
+  .link-hover:focus::after {
     /* transform: scaleX(1); */
     transform: translateX(-50%) scaleX(1);
   }
