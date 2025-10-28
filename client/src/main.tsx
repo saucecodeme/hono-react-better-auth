@@ -30,10 +30,14 @@ const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDom.createRoot(rootElement)
   root.render(
-    <StrictMode>
-      <TanstackQueryProvider {...TanstackQueryProviderContext}>
-        <RouterProvider router={router} />
-      </TanstackQueryProvider>
-    </StrictMode>
+    // <StrictMode>
+    //   <TanstackQueryProvider {...TanstackQueryProviderContext}>
+    //     <RouterProvider router={router} />
+    //   </TanstackQueryProvider>
+    // </StrictMode>
+
+    <TanstackQueryProvider {...TanstackQueryProviderContext}>
+      <RouterProvider router={router} />
+    </TanstackQueryProvider>
   )
 }

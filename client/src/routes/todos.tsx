@@ -16,6 +16,7 @@ import {
   useDeleteTodo,
 } from '@/utils/tanstack-query/useMutation'
 import { triggerToast } from '@/utils/sonner/triggerToast'
+import { TodoComponent } from '@/components/tui/todo'
 
 import {
   createTodoSchema,
@@ -32,6 +33,16 @@ type Todos = TodoQuery[]
 
 const client = hc<AppType>('/')
 
+const TODO: TodoQuery = {
+  id: '',
+  createdAt: '',
+  updatedAt: '',
+  userId: '',
+  title: '',
+  description: '',
+  completed: false,
+}
+
 function RouteComponent() {
   const { data: session } = authClient.useSession()
   const router = useRouter()
@@ -46,7 +57,10 @@ function RouteComponent() {
   })
 
   // Only recalculate this value when the deps change
-  const todos = React.useMemo(() => data ?? [], [data])
+  const todos = React.useMemo(() => {
+    // console.log('Todos:', data)
+    return data ?? []
+  }, [data])
   // For mapping, eliminated unnecessary loop method
   const todoMap = React.useMemo(
     () => new Map(todos.map((todo) => [todo.id, todo])),
@@ -55,7 +69,7 @@ function RouteComponent() {
 
   const [isAdding, setIsAdding] = React.useState(false)
   const [editingTodoId, setEditingTodoId] = React.useState<string | null>(null)
-  const [editingValue, setEditingValue] = React.useState('')
+  const [editingTodo, setEditingTodo] = React.useState<TodoQuery>(TODO)
 
   const newTodoInputRef = React.useRef<HTMLInputElement>(null)
   const editingInputRef = React.useRef<HTMLInputElement>(null)
@@ -183,14 +197,14 @@ function RouteComponent() {
   const handleTodoClick = React.useCallback(
     (id: string) => {
       clearPendingClick()
-      if (editingTodoId) return // Do nothing in the editing mode
+      // if (editingTodoId) return // Do nothing in the editing mode
 
       clickTimeoutRef.current = setTimeout(() => {
         handleCompleteToggle(id)
         clickTimeoutRef.current = null
       }, 200)
     },
-    [clearPendingClick, editingTodoId, handleCompleteToggle]
+    [clearPendingClick, handleCompleteToggle]
   )
 
   const handleEditTodo = React.useCallback(
@@ -198,27 +212,31 @@ function RouteComponent() {
       const todo = todoMap.get(id)
       if (!todo) return
       setEditingTodoId(id)
-      setEditingValue(todo.title)
+      setEditingTodo(todo)
     },
     [todoMap]
   )
 
   const handleEditCancel = React.useCallback(() => {
     setEditingTodoId(null)
-    setEditingValue('')
+    setEditingTodo(TODO)
   }, [])
 
   const handleEditCommit = React.useCallback(() => {
     if (!editingTodoId) return
-    const newTitle = editingValue.trim()
+    const newTitle = editingTodo.title.trim()
+    const newDescription = editingTodo.description?.trim() ?? ''
     const todo = todoMap.get(editingTodoId)
-    if (!todo || todo.title === newTitle) {
+    if (
+      !todo ||
+      (todo.title === newTitle && todo.description === newDescription)
+    ) {
       handleEditCancel()
       return
     }
 
     // Delete todo
-    if (!newTitle) {
+    if (!newTitle && !newDescription) {
       deleteTodo.mutate(editingTodoId, {
         onSuccess: (deletedTodo) => {
           queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
@@ -237,7 +255,10 @@ function RouteComponent() {
       return
     }
 
-    const parsed = patchTodoSchema.safeParse({ title: newTitle })
+    const parsed = patchTodoSchema.safeParse({
+      title: newTitle,
+      description: newDescription,
+    })
     if (parsed.error) {
       showError(z.treeifyError(parsed.error).errors?.[0] ?? 'Invalid input')
       return
@@ -264,11 +285,11 @@ function RouteComponent() {
       }
     )
 
-    handleEditCancel()
+    // handleEditCancel()
   }, [
     deleteTodo,
     editingTodoId,
-    editingValue,
+    editingTodo,
     handleEditCancel,
     patchTodo,
     queryClient,
@@ -285,14 +306,24 @@ function RouteComponent() {
   )
 
   const handleEditInputChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setEditingValue(e.currentTarget.value)
+    (e: React.FormEvent<HTMLFormElement>) => {
+      const form = e.currentTarget
+      const formData = new FormData(form)
+      const payload = Object.fromEntries(formData.entries()) as {
+        title: string
+        description: string
+      }
+      setEditingTodo((prev) => ({
+        ...(prev as TodoQuery),
+        title: payload.title as string,
+        description: payload.description as string,
+      }))
     },
     []
   )
 
   const handleEditInputKeyDown = React.useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: React.KeyboardEvent<HTMLFormElement>) => {
       if (e.key === 'Enter') {
         e.preventDefault()
         handleEditCommit()
@@ -365,23 +396,27 @@ function RouteComponent() {
             </motion.form>
           )}
 
-          {todos.map((todo) => {
+          {/* {todos.map((todo) => {
             const isEditing = editingTodoId === todo.id
 
             return (
-              <motion.label
+              <motion.div
                 key={todo.id}
                 layout
                 animate={{ scale: isEditing ? 1.04 : 1 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 20 }}
                 className="min-w-[250px] flex items-center gap-2 rounded-md px-2 py-1 select-none"
-                onClick={() => handleTodoClick(todo.id)}
+                // onClick={() => handleTodoClick(todo.id)}
                 onDoubleClick={() => handleTodoDoubleClick(todo.id)}
               >
-                <TCheckbox hidden={isEditing} checked={todo.completed} />
+                <TCheckbox
+                  hidden={isEditing}
+                  checked={todo.completed}
+                  onCheckedChange={() => handleTodoClick(todo.id)}
+                />
                 {isEditing ? (
                   <TInput
-                    ref={editingInputRef}
+                    // ref={editingInputRef}
                     value={editingValue}
                     onChange={handleEditInputChange}
                     onBlur={handleEditCommit}
@@ -400,7 +435,25 @@ function RouteComponent() {
                     />
                   </div>
                 )}
-              </motion.label>
+              </motion.div>
+            )
+          })} */}
+
+          {todos.map((todo) => {
+            const isEditing = editingTodoId === todo.id
+            return (
+              <TodoComponent
+                ref={editingInputRef}
+                key={todo.id}
+                todo={todo}
+                isEditing={isEditing}
+                editingTodo={editingTodo}
+                handleTodoClick={handleTodoClick}
+                handleTodoDoubleClick={handleTodoDoubleClick}
+                handleEditInputChange={handleEditInputChange}
+                handleEditCommit={handleEditCommit}
+                handleEditInputKeyDown={handleEditInputKeyDown}
+              />
             )
           })}
         </motion.div>
