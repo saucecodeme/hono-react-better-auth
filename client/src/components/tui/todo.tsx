@@ -11,7 +11,7 @@ export interface TodoComponentProps {
   handleTodoClick: (id: string) => void
   handleTodoDoubleClick: (id: string) => void
   handleEditInputChange: (e: React.FormEvent<HTMLFormElement>) => void
-  handleEditCommit: () => void
+  // handleEditCommit: () => void
   handleEditInputKeyDown: (e: React.KeyboardEvent<HTMLFormElement>) => void
 }
 
@@ -27,7 +27,7 @@ export const TodoComponent = React.forwardRef<
       handleTodoClick,
       handleTodoDoubleClick,
       handleEditInputChange,
-      handleEditCommit,
+      // handleEditCommit,
       handleEditInputKeyDown,
     },
     ref

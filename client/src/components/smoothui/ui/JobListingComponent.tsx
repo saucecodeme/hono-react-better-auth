@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type JSX } from "react"
-import type { SVGProps } from "react"
-import { AnimatePresence, motion } from "motion/react"
-import { useOnClickOutside } from "usehooks-ts"
+import { useEffect, useRef, useState } from 'react'
+import type { SVGProps } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useOnClickOutside } from 'usehooks-ts'
 
 export interface Job {
   company: string
@@ -120,13 +120,13 @@ export default function JobListingComponent({
 
   useEffect(() => {
     function onKeyDown(event: { key: string }) {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         setActiveItem(null)
       }
     }
 
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
   return (
@@ -175,11 +175,11 @@ export default function JobListingComponent({
                         className="text-primary-foreground flex flex-row gap-2 text-xs"
                         layoutId={`workItemExtras-${activeItem.company}`}
                       >
-                        {activeItem.remote === "Yes" &&
+                        {activeItem.remote === 'Yes' &&
                           ` ${activeItem.location} `}
-                        {activeItem.remote === "No" &&
+                        {activeItem.remote === 'No' &&
                           ` ${activeItem.location} `}
-                        {activeItem.remote === "Hybrid" &&
+                        {activeItem.remote === 'Hybrid' &&
                           ` ${activeItem.remote} / ${activeItem.location} `}
                         | {activeItem.job_time}
                       </motion.div>
@@ -200,7 +200,7 @@ export default function JobListingComponent({
           </>
         ) : null}
       </AnimatePresence>
-      <div className={`relative flex items-start p-6 ${className || ""}`}>
+      <div className={`relative flex items-start p-6 ${className || ''}`}>
         <div className="relative flex w-full flex-col items-center gap-4 px-2">
           {jobs.map((role) => (
             <motion.div
@@ -234,9 +234,9 @@ export default function JobListingComponent({
                   className="text-primary-foreground flex flex-row gap-2 text-xs"
                   layoutId={`workItemExtras-${role.company}`}
                 >
-                  {role.remote === "Yes" && ` ${role.location} `}
-                  {role.remote === "No" && ` ${role.location} `}
-                  {role.remote === "Hybrid" &&
+                  {role.remote === 'Yes' && ` ${role.location} `}
+                  {role.remote === 'No' && ` ${role.location} `}
+                  {role.remote === 'Hybrid' &&
                     ` ${role.remote} / ${role.location} `}
                   | {role.job_time}
                 </motion.div>

@@ -4,7 +4,7 @@ import { hc } from 'hono/client'
 import type { AppType } from '../../../server'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { BadgeAlert, Save } from 'lucide-react'
-import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
+// import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 import { motion } from 'motion/react'
@@ -451,7 +451,7 @@ function RouteComponent() {
                 handleTodoClick={handleTodoClick}
                 handleTodoDoubleClick={handleTodoDoubleClick}
                 handleEditInputChange={handleEditInputChange}
-                handleEditCommit={handleEditCommit}
+                // handleEditCommit={handleEditCommit}
                 handleEditInputKeyDown={handleEditInputKeyDown}
               />
             )
