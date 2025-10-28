@@ -3,7 +3,6 @@ import type { TodoQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput } from '@/components/tui/input'
-import { useEffect, useRef } from 'react'
 
 export interface TodoComponentProps {
   todo: TodoQuery
@@ -33,33 +32,8 @@ export const TodoComponent = React.forwardRef<
     },
     ref
   ) => {
-    // console.log('todo:', todo)
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-    const autoResizeTextarea = () => {
-      const textarea = textareaRef.current
-      if (textarea) {
-        textarea.style.height = 'auto'
-        textarea.style.height = `${textarea.scrollHeight}px`
-      }
-    }
-
-    useEffect(() => {
-      if (isEditing) {
-        autoResizeTextarea()
-      }
-    }, [isEditing, editingTodo.description])
-
-    // const handleFormChange = (e: React.FormEvent<HTMLFormElement>) => {
-    //   console.log()
-    //   const form = e.currentTarget
-    //   const formData = new FormData(form)
-    //   const payload = Object.fromEntries(formData.entries())
-    //   console.log(payload)
-    // }
     return (
       <>
-        {/* <AccordionDemo /> */}
         <motion.form
           layout
           // ref={ref}
@@ -90,7 +64,6 @@ export const TodoComponent = React.forwardRef<
                 name="title"
                 variant="plain"
                 defaultValue={editingTodo.title}
-                // onKeyDown={handleEditInputKeyDown}
                 className="w-full rounded-none"
               />
             ) : (
@@ -122,13 +95,11 @@ export const TodoComponent = React.forwardRef<
                 className="overflow-hidden pl-6 w-full text-s-foreground/70 text-sm font-normal"
               >
                 <textarea
-                  ref={textareaRef}
                   id={`desc-${todo.id}`}
                   name="description"
-                  className="my-1 mb-3 w-full text-sm outline-none resize-none overflow-hidden"
+                  className="my-1 mb-3 w-full text-sm outline-none resize-none overflow-hidden field-sizing-content"
                   defaultValue={editingTodo.description ?? ''}
                   placeholder="Notes"
-                  onChange={autoResizeTextarea}
                   style={{ minHeight: '24px' }}
                 />
               </motion.div>

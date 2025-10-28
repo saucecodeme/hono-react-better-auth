@@ -329,6 +329,7 @@ function RouteComponent() {
         handleEditCommit()
       } else if (e.key === 'Escape') {
         e.preventDefault()
+        handleEditCommit()
         handleEditCancel()
       }
     },
