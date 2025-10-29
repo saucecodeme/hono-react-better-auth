@@ -1,8 +1,8 @@
 import type { ComponentType } from 'react'
 import { toast } from 'sonner'
-import { Unplug, BadgeCheck, Bug } from 'lucide-react'
+import { Unplug, BadgeCheck, Bug, Save } from 'lucide-react'
 
-type TriggerCase = 'signin' | 'signout' | 'offline' | 'error'
+type TriggerCase = 'signin' | 'signout' | 'offline' | 'error' | 'save'
 
 type ToastConfig = {
   message: string
@@ -25,6 +25,10 @@ const toastConfig: Record<TriggerCase, ToastConfig> = {
   error: {
     message: 'An unexpected errors occured',
     icon: Bug,
+  },
+  save: {
+    message: 'Autosave',
+    icon: Save,
   },
 }
 

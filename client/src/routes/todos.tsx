@@ -21,6 +21,7 @@ import { TodoComponent } from '@/components/tui/todo'
 import {
   createTodoSchema,
   patchTodoSchema,
+  type CreateTodo,
   type TodoQuery,
 } from '../../../server/types'
 import z from 'zod'
@@ -67,7 +68,7 @@ function RouteComponent() {
     [todos]
   )
 
-  const [isAdding, setIsAdding] = React.useState(false)
+  // const [isAdding, setIsAdding] = React.useState(false)
   const [editingTodoId, setEditingTodoId] = React.useState<string | null>(null)
   const [editingTodo, setEditingTodo] = React.useState<TodoQuery>(TODO)
 
@@ -94,13 +95,15 @@ function RouteComponent() {
   }, [router, session])
 
   // Focusing the specific element for better UX
-  React.useEffect(() => {
-    if (!isAdding) return
-    const frame = requestAnimationFrame(() => {
-      newTodoInputRef.current?.focus()
-    })
-    return () => cancelAnimationFrame(frame)
-  }, [isAdding])
+  // React.useEffect(() => {
+  //   if (!isAdding) return
+  //   const frame = requestAnimationFrame(() => {
+  //     newTodoInputRef.current?.focus()
+  //   })
+
+  //   return () => cancelAnimationFrame(frame)
+  // }, [isAdding])
+
   React.useEffect(() => {
     if (!editingTodoId) return
     const frame = requestAnimationFrame(() => {
@@ -121,47 +124,47 @@ function RouteComponent() {
   const deleteTodo = useDeleteTodo()
 
   // Prevent TButton unnecessary re-renders
-  const handleToggleAdd = React.useCallback(
-    () => setIsAdding((prev) => !prev),
-    []
-  )
+  // const handleToggleAdd = React.useCallback(
+  //   () => setIsAdding((prev) => !prev),
+  //   []
+  // )
 
   // ? No need to wrap this inside useCallback
-  const handleSubmitNewTodo = React.useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault()
-      const formData = new FormData(e.currentTarget)
-      const payload = Object.fromEntries(formData.entries()) as {
-        title: string
-      }
-      const parsed = createTodoSchema.safeParse(payload)
-      if (parsed.error) {
-        showError(z.treeifyError(parsed.error).errors?.[0] ?? 'Invalid input')
-        return
-      }
+  // const handleSubmitNewTodo = React.useCallback(
+  //   (e: React.FormEvent<HTMLFormElement>) => {
+  //     e.preventDefault()
+  //     const formData = new FormData(e.currentTarget)
+  //     const payload = Object.fromEntries(formData.entries()) as {
+  //       title: string
+  //     }
+  //     const parsed = createTodoSchema.safeParse(payload)
+  //     if (parsed.error) {
+  //       showError(z.treeifyError(parsed.error).errors?.[0] ?? 'Invalid input')
+  //       return
+  //     }
 
-      createTodo.mutate(parsed.data, {
-        onSuccess: (createdTodo) => {
-          // update query data cache manually (UI update instantly)
-          queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
-            createdTodo as TodoQuery,
-            ...prev,
-          ])
-        },
-        onError: (mutationError) => {
-          showError(
-            mutationError instanceof Error
-              ? mutationError.message
-              : 'Failed to create todo'
-          )
-        },
-      })
+  //     createTodo.mutate(parsed.data, {
+  //       onSuccess: (createdTodo) => {
+  //         // update query data cache manually (UI update instantly)
+  //         queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
+  //           createdTodo as TodoQuery,
+  //           ...prev,
+  //         ])
+  //       },
+  //       onError: (mutationError) => {
+  //         showError(
+  //           mutationError instanceof Error
+  //             ? mutationError.message
+  //             : 'Failed to create todo'
+  //         )
+  //       },
+  //     })
 
-      e.currentTarget.reset()
-      setIsAdding(false)
-    },
-    [createTodo, queryClient, showError]
-  )
+  //     e.currentTarget.reset()
+  //     setIsAdding(false)
+  //   },
+  //   [createTodo, queryClient, showError]
+  // )
 
   // Single & Double click, Editing mode
   const handleCompleteToggle = React.useCallback(
@@ -267,6 +270,7 @@ function RouteComponent() {
       { id: editingTodoId, data: parsed.data },
       {
         onSuccess: (updatedTodo) => {
+          triggerToast('save')
           queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
             prev.map((todo) =>
               todo.id === (updatedTodo as TodoQuery).id
@@ -285,7 +289,7 @@ function RouteComponent() {
       }
     )
 
-    // handleEditCancel()
+    handleEditCancel()
   }, [
     deleteTodo,
     editingTodoId,
@@ -303,6 +307,16 @@ function RouteComponent() {
       handleEditTodo(id)
     },
     [handleEditTodo, clearPendingClick]
+  )
+
+  const handleLoseFocus = React.useCallback(
+    (e: React.FocusEvent<HTMLFormElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        console.log('Outside form')
+        handleEditCommit()
+      }
+    },
+    [handleEditCommit]
   )
 
   const handleEditInputChange = React.useCallback(
@@ -336,6 +350,31 @@ function RouteComponent() {
     [handleEditCommit, handleEditCancel]
   )
 
+  const handleInitNewTodo = React.useCallback(() => {
+    const blankTodo: CreateTodo = { title: 'New todo', description: '' }
+    createTodo.mutate(blankTodo, {
+      onSuccess: (createdTodo) => {
+        // update query data cache manually (UI update instantly) -> this is not instantly
+        queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
+          createdTodo as TodoQuery,
+          ...prev,
+        ])
+        triggerToast('save', 'Init new todo')
+        // handleTodoDoubleClick((createdTodo as TodoQuery).id)
+        // handleEditTodo((createdTodo as TodoQuery).id)
+        setEditingTodoId((createdTodo as TodoQuery).id)
+        setEditingTodo(createdTodo as TodoQuery)
+      },
+      onError: (mutationError) => {
+        showError(
+          mutationError instanceof Error
+            ? mutationError.message
+            : 'Failed to create todo'
+        )
+      },
+    })
+  }, [createTodo, queryClient, showError])
+
   if (isLoading) {
     return (
       <div className="route-starter flex flex-col">
@@ -364,7 +403,7 @@ function RouteComponent() {
     <section className="route-starter">
       <div className="w-full flex flex-col items-center gap-4">
         <motion.div>
-          {isAdding && (
+          {/* {isAdding && (
             <motion.form
               className="w-full py-3 flex flex-row item-start gap-1.5"
               initial={{ opacity: 0, y: -16, scale: 0.96 }}
@@ -395,7 +434,7 @@ function RouteComponent() {
                 <Save size={16} />
               </TButton>
             </motion.form>
-          )}
+          )} */}
 
           {/* {todos.map((todo) => {
             const isEditing = editingTodoId === todo.id
@@ -452,8 +491,8 @@ function RouteComponent() {
                 handleTodoClick={handleTodoClick}
                 handleTodoDoubleClick={handleTodoDoubleClick}
                 handleEditInputChange={handleEditInputChange}
-                // handleEditCommit={handleEditCommit}
                 handleEditInputKeyDown={handleEditInputKeyDown}
+                handleLoseFocus={handleLoseFocus}
               />
             )
           })}
@@ -470,9 +509,9 @@ function RouteComponent() {
           <TButton
             variant="link"
             className="text-s-foreground/50 text-sm"
-            onClick={handleToggleAdd}
+            onClick={handleInitNewTodo}
           >
-            {isAdding ? 'Close new todo' : 'Add new todo'}
+            Add new todo
           </TButton>
         </motion.div>
       </div>
