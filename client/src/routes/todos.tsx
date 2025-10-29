@@ -45,7 +45,9 @@ const TODO: TodoQuery = {
 }
 
 function RouteComponent() {
-  const { data: session } = authClient.useSession()
+  const [forceLoading, setForceLoading] = React.useState(true)
+
+  const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
   const { data, isLoading, error } = useQuery<Todos>({
@@ -56,6 +58,13 @@ function RouteComponent() {
       return res.json()
     },
   })
+
+  React.useEffect(() => {
+    const ref = setTimeout(() => {
+      setForceLoading(false)
+    }, 3000)
+    return clearTimeout(ref)
+  }, [])
 
   // Only recalculate this value when the deps change
   const todos = React.useMemo(() => {
@@ -88,11 +97,16 @@ function RouteComponent() {
   })
 
   // Comment this out first
+  const navigateToSignin = React.useEffectEvent(() => {
+    router.navigate({ to: '/signin', replace: true })
+  })
+
   React.useEffect(() => {
-    if (!session) {
-      router.navigate({ to: '/signin', replace: true })
+    if (!session && !isPending) {
+      // router.navigate({ to: '/signin', replace: true })
+      navigateToSignin()
     }
-  }, [router, session])
+  }, [session, isPending, navigateToSignin])
 
   // Focusing the specific element for better UX
   // React.useEffect(() => {
@@ -311,10 +325,7 @@ function RouteComponent() {
 
   const handleLoseFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        console.log('Outside form')
-        handleEditCommit()
-      }
+      if (!e.currentTarget.contains(e.relatedTarget)) handleEditCommit()
     },
     [handleEditCommit]
   )
@@ -375,7 +386,7 @@ function RouteComponent() {
     })
   }, [createTodo, queryClient, showError])
 
-  if (isLoading) {
+  if (isLoading && forceLoading) {
     return (
       <div className="route-starter flex flex-col">
         <div className="flex flex-col gap-4 w-[100px]">
