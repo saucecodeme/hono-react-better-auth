@@ -6,6 +6,7 @@ import { Input as TInput } from '@/components/tui/input'
 import { BadgeCheck } from 'lucide-react'
 import { authClient } from '../lib/auth-client'
 import { WarningMessage } from '@/components/WarningMessage'
+import { VALIDATION } from '@/lib/constants'
 
 export const Route = createFileRoute('/signup')({
   component: RouteComponent,
@@ -195,7 +196,7 @@ function RouteComponent() {
             type="text"
             autoComplete="off"
             pattern="[A-Za-z]+"
-            minLength={3}
+            minLength={VALIDATION.NAME_MIN_LENGTH}
             maxLength={30}
             placeholder="e.g. Supitcha"
             required
@@ -222,7 +223,7 @@ function RouteComponent() {
             type="password"
             autoComplete="off"
             pattern="[A-Za-z0-9@]+"
-            minLength={6}
+            minLength={VALIDATION.PASSWORD_MIN_LENGTH}
             maxLength={30}
             required
             aria-invalid={Boolean(errors.password)}
@@ -236,7 +237,7 @@ function RouteComponent() {
             type="password"
             autoComplete="off"
             pattern="[A-Za-z0-9@]+"
-            minLength={6}
+            minLength={VALIDATION.PASSWORD_MIN_LENGTH}
             maxLength={30}
             required
             aria-invalid={Boolean(errors.confirm)}

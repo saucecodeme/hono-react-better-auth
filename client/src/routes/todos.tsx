@@ -15,6 +15,7 @@ import {
 } from '@/utils/tanstack-query/useMutation'
 import { triggerToast } from '@/utils/sonner/triggerToast'
 import { TodoComponent } from '@/components/tui/todo'
+import { UI } from '@/lib/constants'
 
 import {
   createTodoSchema,
@@ -140,7 +141,7 @@ function RouteComponent() {
       clickTimeoutRef.current = setTimeout(() => {
         handleCompleteToggle(id)
         clickTimeoutRef.current = null
-      }, 200)
+      }, UI.DOUBLE_CLICK_DELAY_MS)
     },
     [clearPendingClick, handleCompleteToggle]
   )

@@ -6,6 +6,7 @@ import { Input as TInput } from '@/components/tui/input'
 import { BadgeCheck } from 'lucide-react'
 import { authClient } from '../lib/auth-client'
 import { WarningMessage } from '@/components/WarningMessage'
+import { VALIDATION } from '@/lib/constants'
 
 export const Route = createFileRoute('/signin')({
   component: RouteComponent,
@@ -141,7 +142,7 @@ function RouteComponent() {
             type="password"
             autoComplete="off"
             pattern="[A-Za-z0-9@]+"
-            minLength={6}
+            minLength={VALIDATION.PASSWORD_MIN_LENGTH}
             maxLength={30}
             required
             aria-invalid={Boolean(errors.password)}
