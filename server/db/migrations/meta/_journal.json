@@ -43,6 +43,13 @@
       "when": 1761567387777,
       "tag": "0005_cute_dakota_north",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761710712096,
+      "tag": "0006_busy_thundra",
+      "breakpoints": true
     }
   ]
 }

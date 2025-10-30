@@ -3,6 +3,8 @@ import type { TodoQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput } from '@/components/tui/input'
+import { Tag } from 'lucide-react'
+import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
 
 export interface TodoComponentProps {
   todo: TodoQuery
@@ -33,21 +35,12 @@ export const TodoComponent = React.forwardRef<
     },
     ref
   ) => {
-    const handleOnBlur = (e: React.FocusEvent<HTMLFormElement>) => {
-      console.log(e.currentTarget)
-
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        console.log('Outside the form')
-      }
-    }
-
     return (
       <>
         <motion.form
           layout
           // ref={ref}
-          className={`w-[300px] h-fit px-2 flex flex-col items-start justify-start rounded-lg \
-            ${isEditing ? '' : ''}`}
+          className={`w-[300px] h-fit px-2 flex flex-col items-start justify-start rounded-lg`}
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
           onChange={handleEditInputChange}
           onKeyDown={handleEditInputKeyDown}
@@ -106,11 +99,52 @@ export const TodoComponent = React.forwardRef<
                 <textarea
                   id={`desc-${todo.id}`}
                   name="description"
-                  className="my-1 mb-3 w-full text-sm outline-none resize-none overflow-hidden field-sizing-content"
+                  className="my-1 w-full text-sm outline-none resize-none overflow-hidden field-sizing-content"
                   defaultValue={editingTodo.description ?? ''}
                   placeholder="Notes"
                   style={{ minHeight: '24px' }}
                 />
+                <div className="w-full flex justify-between items-center">
+                  <div className="flex flex-row gap-1">
+                    <div className="px-2 py-1 flex flex-row gap-1 items-center bg-s-destructive/50 rounded-lg text-xs">
+                      <Tag size={10} strokeWidth={3} />
+                      <span>Frontend</span>
+                    </div>
+                    <div className="px-2 py-1 flex flex-row gap-1 items-center bg-s-success/50 rounded-lg text-xs">
+                      <Tag size={10} strokeWidth={3} />
+                      <span>Backend</span>
+                    </div>
+                  </div>
+                  <DialogTrigger className="p-1 rounded-md">
+                    <Tag size={14} strokeWidth={3} />
+                  </DialogTrigger>
+                </div>
+                {/* <Dialog>
+                  <div className="w-full h-5 flex flex-row justify-end items-center">
+                    <DialogTrigger>
+                      <Tag size={14} strokeWidth={3} />
+                    </DialogTrigger>
+                    <DialogContent
+                      className="p-4 bg-s-accent/10 rounded-lg min-w-[250px]
+                        shadow-lg
+                        flex flex-col items-center justify-start gap-4 backdrop-blur-sm"
+                    >
+                      <p>Tags</p>
+                      <div className="w-full flex flex-col gap-2 items-start justify-start">
+                        {['Frontend', 'Backend', 'UIUX'].map((tagName) => (
+                          <div
+                            key={tagName}
+                            className="flex flex-row justify-start items-center gap-2"
+                          >
+                            <Tag size={12} strokeWidth={2} />
+                            <span>{tagName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </div>
+                </Dialog> */}
+                {/* <div className="mb-3 " /> */}
               </motion.div>
             )}
           </AnimatePresence>

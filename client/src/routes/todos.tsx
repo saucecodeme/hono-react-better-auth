@@ -3,13 +3,13 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { hc } from 'hono/client'
 import type { AppType } from '../../../server'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BadgeAlert, Save } from 'lucide-react'
+import { BadgeAlert, Tag } from 'lucide-react'
 // import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 import { motion } from 'motion/react'
 import { Button as TButton } from '@/components/tui/button'
-import { Input as TInput } from '@/components/tui/input'
+// import { Input as TInput } from '@/components/tui/input'
 import {
   useCreateTodo,
   usePatchTodo,
@@ -19,12 +19,12 @@ import { triggerToast } from '@/utils/sonner/triggerToast'
 import { TodoComponent } from '@/components/tui/todo'
 
 import {
-  createTodoSchema,
   patchTodoSchema,
   type CreateTodo,
   type TodoQuery,
 } from '../../../server/types'
 import z from 'zod'
+import { Dialog, DialogContent } from '@/components/tui/dialog'
 
 export const Route = createFileRoute('/todos')({
   component: RouteComponent,
@@ -81,7 +81,6 @@ function RouteComponent() {
   const [editingTodoId, setEditingTodoId] = React.useState<string | null>(null)
   const [editingTodo, setEditingTodo] = React.useState<TodoQuery>(TODO)
 
-  const newTodoInputRef = React.useRef<HTMLInputElement>(null)
   const editingInputRef = React.useRef<HTMLInputElement>(null)
   const clickTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
 
@@ -325,7 +324,11 @@ function RouteComponent() {
 
   const handleLoseFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
-      if (!e.currentTarget.contains(e.relatedTarget)) handleEditCommit()
+      console.log(e.currentTarget, e.target)
+      const isMovingToDialog = e.relatedTarget?.closest('[role="dialog"]')
+      console.log(isMovingToDialog)
+      if (!e.currentTarget.contains(e.relatedTarget) && !isMovingToDialog)
+        handleEditCommit()
     },
     [handleEditCommit]
   )
@@ -489,24 +492,48 @@ function RouteComponent() {
               </motion.div>
             )
           })} */}
-
-          {todos.map((todo) => {
-            const isEditing = editingTodoId === todo.id
-            return (
-              <TodoComponent
-                ref={editingInputRef}
-                key={todo.id}
-                todo={todo}
-                isEditing={isEditing}
-                editingTodo={editingTodo}
-                handleTodoClick={handleTodoClick}
-                handleTodoDoubleClick={handleTodoDoubleClick}
-                handleEditInputChange={handleEditInputChange}
-                handleEditInputKeyDown={handleEditInputKeyDown}
-                handleLoseFocus={handleLoseFocus}
-              />
-            )
-          })}
+          <Dialog>
+            {todos.map((todo) => {
+              const isEditing = editingTodoId === todo.id
+              return (
+                <TodoComponent
+                  ref={editingInputRef}
+                  key={todo.id}
+                  todo={todo}
+                  isEditing={isEditing}
+                  editingTodo={editingTodo}
+                  handleTodoClick={handleTodoClick}
+                  handleTodoDoubleClick={handleTodoDoubleClick}
+                  handleEditInputChange={handleEditInputChange}
+                  handleEditInputKeyDown={handleEditInputKeyDown}
+                  handleLoseFocus={handleLoseFocus}
+                />
+              )
+            })}
+            <div className="w-full h-5 flex flex-row justify-end items-center">
+              {/* <DialogTrigger>
+                <Tag size={14} strokeWidth={3} />
+              </DialogTrigger> */}
+              <DialogContent
+                className="px-4 py-4 bg-s-accent/30 rounded-lg min-w-[250px] shadow-lg \
+                flex flex-col items-center justify-start gap-4 backdrop-blur-sm"
+              >
+                <p>Tags</p>
+                <div className="w-full flex flex-col gap-1 items-start justify-start">
+                  {['Frontend', 'Backend', 'UIUX'].map((tagName) => (
+                    <div
+                      key={tagName}
+                      className="w-full px-3 py-1 flex flex-row justify-start items-center \
+                        rounded-md gap-2 text-s-primary hover:bg-black/20 transition-all duration-200 ease-in-out"
+                    >
+                      <Tag size={12} strokeWidth={3} />
+                      <span>{tagName}</span>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </div>
+          </Dialog>
         </motion.div>
         <motion.div
           layout

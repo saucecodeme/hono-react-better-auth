@@ -212,6 +212,10 @@
   z-index: -1;
 }
 
+.bg-noise {
+  background: url('./assets/noise-light.webp') rgb(54, 86, 107);
+}
+
 @layer components {
   .route-starter {
     @apply py-[100px] h-full flex justify-center items-center;

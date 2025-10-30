@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { hc } from 'hono/client'
 import type { AppType } from '../../../../server'
-import type { CreateTodo, PatchTodo } from '../../../../server/types'
+import type { CreateTodo, PatchTodo, CreateTag } from '../../../../server/types'
 
 const client = hc<AppType>('/')
 
@@ -65,6 +65,20 @@ export function useDeleteTodo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+}
+
+// * Tags
+export function useCreateTag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (newTag: CreateTag) => {
+      const res = await client.api.tags.$post({ json: newTag })
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] })
     },
   })
 }
