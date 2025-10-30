@@ -3,13 +3,11 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { hc } from 'hono/client'
 import type { AppType } from '../../../server'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BadgeAlert, Save } from 'lucide-react'
-// import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
+import { BadgeAlert } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 import { motion } from 'motion/react'
 import { Button as TButton } from '@/components/tui/button'
-import { Input as TInput } from '@/components/tui/input'
 import {
   useCreateTodo,
   usePatchTodo,
@@ -57,26 +55,21 @@ function RouteComponent() {
     },
   })
 
-  // Only recalculate this value when the deps change
   const todos = React.useMemo(() => {
-    // console.log('Todos:', data)
     return data ?? []
   }, [data])
-  // For mapping, eliminated unnecessary loop method
+
   const todoMap = React.useMemo(
     () => new Map(todos.map((todo) => [todo.id, todo])),
     [todos]
   )
 
-  // const [isAdding, setIsAdding] = React.useState(false)
   const [editingTodoId, setEditingTodoId] = React.useState<string | null>(null)
   const [editingTodo, setEditingTodo] = React.useState<TodoQuery>(TODO)
 
-  const newTodoInputRef = React.useRef<HTMLInputElement>(null)
   const editingInputRef = React.useRef<HTMLInputElement>(null)
   const clickTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
 
-  // ? No need to wrap this inside useEffectEvent
   const showError = React.useEffectEvent((message: string) => {
     triggerToast('error', message)
   })
@@ -87,22 +80,11 @@ function RouteComponent() {
     }
   })
 
-  // Comment this out first
   React.useEffect(() => {
     if (!session) {
       router.navigate({ to: '/signin', replace: true })
     }
   }, [router, session])
-
-  // Focusing the specific element for better UX
-  // React.useEffect(() => {
-  //   if (!isAdding) return
-  //   const frame = requestAnimationFrame(() => {
-  //     newTodoInputRef.current?.focus()
-  //   })
-
-  //   return () => cancelAnimationFrame(frame)
-  // }, [isAdding])
 
   React.useEffect(() => {
     if (!editingTodoId) return
@@ -113,60 +95,14 @@ function RouteComponent() {
     return () => cancelAnimationFrame(frame)
   }, [editingTodoId])
 
-  // To make sure that the callback is not running after unmount
   React.useEffect(() => {
     return () => clearPendingClick()
   }, [clearPendingClick])
 
-  // Use useMutation from TanStack Query to send the request and call invalidateQueries on success
   const createTodo = useCreateTodo()
   const patchTodo = usePatchTodo()
   const deleteTodo = useDeleteTodo()
 
-  // Prevent TButton unnecessary re-renders
-  // const handleToggleAdd = React.useCallback(
-  //   () => setIsAdding((prev) => !prev),
-  //   []
-  // )
-
-  // ? No need to wrap this inside useCallback
-  // const handleSubmitNewTodo = React.useCallback(
-  //   (e: React.FormEvent<HTMLFormElement>) => {
-  //     e.preventDefault()
-  //     const formData = new FormData(e.currentTarget)
-  //     const payload = Object.fromEntries(formData.entries()) as {
-  //       title: string
-  //     }
-  //     const parsed = createTodoSchema.safeParse(payload)
-  //     if (parsed.error) {
-  //       showError(z.treeifyError(parsed.error).errors?.[0] ?? 'Invalid input')
-  //       return
-  //     }
-
-  //     createTodo.mutate(parsed.data, {
-  //       onSuccess: (createdTodo) => {
-  //         // update query data cache manually (UI update instantly)
-  //         queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
-  //           createdTodo as TodoQuery,
-  //           ...prev,
-  //         ])
-  //       },
-  //       onError: (mutationError) => {
-  //         showError(
-  //           mutationError instanceof Error
-  //             ? mutationError.message
-  //             : 'Failed to create todo'
-  //         )
-  //       },
-  //     })
-
-  //     e.currentTarget.reset()
-  //     setIsAdding(false)
-  //   },
-  //   [createTodo, queryClient, showError]
-  // )
-
-  // Single & Double click, Editing mode
   const handleCompleteToggle = React.useCallback(
     (id: string) => {
       const todo = todoMap.get(id)
@@ -200,7 +136,6 @@ function RouteComponent() {
   const handleTodoClick = React.useCallback(
     (id: string) => {
       clearPendingClick()
-      // if (editingTodoId) return // Do nothing in the editing mode
 
       clickTimeoutRef.current = setTimeout(() => {
         handleCompleteToggle(id)
@@ -242,8 +177,9 @@ function RouteComponent() {
     if (!newTitle && !newDescription) {
       deleteTodo.mutate(editingTodoId, {
         onSuccess: (deletedTodo) => {
+          const todo = deletedTodo as TodoQuery
           queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
-            prev.filter((todo) => todo.id !== (deletedTodo as TodoQuery).id)
+            prev.filter((item) => item.id !== todo.id)
           )
         },
         onError: (mutationError) => {
@@ -270,13 +206,10 @@ function RouteComponent() {
       { id: editingTodoId, data: parsed.data },
       {
         onSuccess: (updatedTodo) => {
+          const todo = updatedTodo as TodoQuery
           triggerToast('save')
           queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
-            prev.map((todo) =>
-              todo.id === (updatedTodo as TodoQuery).id
-                ? (updatedTodo as TodoQuery)
-                : todo
-            )
+            prev.map((item) => (item.id === todo.id ? todo : item))
           )
         },
         onError: (mutationError) => {
@@ -312,7 +245,6 @@ function RouteComponent() {
   const handleLoseFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
       if (!e.currentTarget.contains(e.relatedTarget)) {
-        console.log('Outside form')
         handleEditCommit()
       }
     },
@@ -323,14 +255,13 @@ function RouteComponent() {
     (e: React.FormEvent<HTMLFormElement>) => {
       const form = e.currentTarget
       const formData = new FormData(form)
-      const payload = Object.fromEntries(formData.entries()) as {
-        title: string
-        description: string
-      }
+      const title = formData.get('title')
+      const description = formData.get('description')
+
       setEditingTodo((prev) => ({
-        ...(prev as TodoQuery),
-        title: payload.title as string,
-        description: payload.description as string,
+        ...prev,
+        title: typeof title === 'string' ? title : '',
+        description: typeof description === 'string' ? description : '',
       }))
     },
     []
@@ -354,16 +285,14 @@ function RouteComponent() {
     const blankTodo: CreateTodo = { title: 'New todo', description: '' }
     createTodo.mutate(blankTodo, {
       onSuccess: (createdTodo) => {
-        // update query data cache manually (UI update instantly) -> this is not instantly
+        const todo = createdTodo as TodoQuery
         queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
-          createdTodo as TodoQuery,
+          todo,
           ...prev,
         ])
         triggerToast('save', 'Init new todo')
-        // handleTodoDoubleClick((createdTodo as TodoQuery).id)
-        // handleEditTodo((createdTodo as TodoQuery).id)
-        setEditingTodoId((createdTodo as TodoQuery).id)
-        setEditingTodo(createdTodo as TodoQuery)
+        setEditingTodoId(todo.id)
+        setEditingTodo(todo)
       },
       onError: (mutationError) => {
         showError(
@@ -403,82 +332,6 @@ function RouteComponent() {
     <section className="route-starter">
       <div className="w-full flex flex-col items-center gap-4">
         <motion.div>
-          {/* {isAdding && (
-            <motion.form
-              className="w-full py-3 flex flex-row item-start gap-1.5"
-              initial={{ opacity: 0, y: -16, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.98 }}
-              transition={{
-                type: 'spring',
-                delay: 0.2,
-                bounce: 0,
-                duration: 0.35,
-              }}
-              onSubmit={handleSubmitNewTodo}
-            >
-              <TInput
-                ref={newTodoInputRef}
-                name="title"
-                placeholder="What needs to be done?"
-                className="h-8 w-full text-sm"
-                required
-              />
-              <TButton
-                type="submit"
-                variant="plain"
-                className="h-8 rounded-md flex self-stretch items-center justify-center bg-black/80 hover:bg-black"
-                size="default"
-                disabled={createTodo.isPending}
-              >
-                <Save size={16} />
-              </TButton>
-            </motion.form>
-          )} */}
-
-          {/* {todos.map((todo) => {
-            const isEditing = editingTodoId === todo.id
-
-            return (
-              <motion.div
-                key={todo.id}
-                layout
-                animate={{ scale: isEditing ? 1.04 : 1 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                className="min-w-[250px] flex items-center gap-2 rounded-md px-2 py-1 select-none"
-                // onClick={() => handleTodoClick(todo.id)}
-                onDoubleClick={() => handleTodoDoubleClick(todo.id)}
-              >
-                <TCheckbox
-                  hidden={isEditing}
-                  checked={todo.completed}
-                  onCheckedChange={() => handleTodoClick(todo.id)}
-                />
-                {isEditing ? (
-                  <TInput
-                    // ref={editingInputRef}
-                    value={editingValue}
-                    onChange={handleEditInputChange}
-                    onBlur={handleEditCommit}
-                    onKeyDown={handleEditInputKeyDown}
-                    className="h-7 w-full text-sm"
-                  />
-                ) : (
-                  <div className="relative inline-block truncate">
-                    <span>{todo.title}</span>
-                    <motion.span
-                      className="pointer-events-none absolute left-0 right-0 top-1/2 h-0.5 bg-current"
-                      initial={false}
-                      animate={{ scaleX: todo.completed ? 1 : 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
-                      style={{ transformOrigin: 'left center' }}
-                    />
-                  </div>
-                )}
-              </motion.div>
-            )
-          })} */}
-
           {todos.map((todo) => {
             const isEditing = editingTodoId === todo.id
             return (
