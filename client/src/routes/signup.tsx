@@ -5,25 +5,11 @@ import { Button } from '@/components/tui/button'
 import { Input as TInput } from '@/components/tui/input'
 import { BadgeCheck } from 'lucide-react'
 import { authClient } from '../lib/auth-client'
+import { WarningMessage } from '@/components/WarningMessage'
 
 export const Route = createFileRoute('/signup')({
   component: RouteComponent,
 })
-
-function WarningMessage({ name, message }: { name: string; message: string }) {
-  return (
-    <span
-      id={`${name}-validaton-status`}
-      role="alert"
-      aria-live="polite"
-      aria-atomic="true"
-      aria-label={`${name} input validation`}
-      className="warning-message text-nowrap"
-    >
-      {message}
-    </span>
-  )
-}
 
 type ErrorState = Record<
   'name' | 'email' | 'password' | 'confirm' | 'form',
@@ -181,7 +167,7 @@ function RouteComponent() {
       form.reset()
       router.navigate({ to: '/todos' })
     } catch (error) {
-      setErrors((prev) => ({ ...prev, form: 'An unexpected error occured' }))
+      setErrors((prev) => ({ ...prev, form: 'An unexpected error occurred' }))
       console.error(`Sign Up failed: ${error}`)
     } finally {
       setIsLoading(false)

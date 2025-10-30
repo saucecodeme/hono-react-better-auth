@@ -11,7 +11,6 @@ export interface TodoComponentProps {
   handleTodoClick: (id: string) => void
   handleTodoDoubleClick: (id: string) => void
   handleEditInputChange: (e: React.FormEvent<HTMLFormElement>) => void
-  // handleEditCommit: () => void
   handleEditInputKeyDown: (e: React.KeyboardEvent<HTMLFormElement>) => void
   handleLoseFocus: (e: React.FocusEvent<HTMLFormElement>) => void
 }
@@ -33,21 +32,11 @@ export const TodoComponent = React.forwardRef<
     },
     ref
   ) => {
-    const handleOnBlur = (e: React.FocusEvent<HTMLFormElement>) => {
-      console.log(e.currentTarget)
-
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        console.log('Outside the form')
-      }
-    }
-
     return (
       <>
         <motion.form
           layout
-          // ref={ref}
-          className={`w-[300px] h-fit px-2 flex flex-col items-start justify-start rounded-lg \
-            ${isEditing ? '' : ''}`}
+          className="w-[300px] h-fit px-2 flex flex-col items-start justify-start rounded-lg"
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
           onChange={handleEditInputChange}
           onKeyDown={handleEditInputKeyDown}

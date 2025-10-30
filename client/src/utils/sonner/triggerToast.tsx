@@ -23,7 +23,7 @@ const toastConfig: Record<TriggerCase, ToastConfig> = {
     icon: Unplug,
   },
   error: {
-    message: 'An unexpected errors occured',
+    message: 'An unexpected error occurred',
     icon: Bug,
   },
   save: {

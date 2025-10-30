@@ -5,25 +5,11 @@ import { Button } from '@/components/tui/button'
 import { Input as TInput } from '@/components/tui/input'
 import { BadgeCheck } from 'lucide-react'
 import { authClient } from '../lib/auth-client'
+import { WarningMessage } from '@/components/WarningMessage'
 
 export const Route = createFileRoute('/signin')({
   component: RouteComponent,
 })
-
-function WarningMessage({ name, message }: { name: string; message: string }) {
-  return (
-    <span
-      id={`${name}-validaton-status`}
-      role="alert"
-      aria-live="polite"
-      aria-atomic="true"
-      aria-label={`${name} input validation`}
-      className="warning-message text-nowrap"
-    >
-      {message}
-    </span>
-  )
-}
 
 type ErrorState = Record<'email' | 'password' | 'form', string>
 

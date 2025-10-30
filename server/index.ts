@@ -4,7 +4,6 @@ import { todos } from "./routes/todo.routes";
 import { serveStatic } from "hono/bun";
 import { logger } from "hono/logger";
 
-// const app = new Hono().basePath("/api");
 const app = new Hono();
 
 const router = app
