@@ -1,6 +1,6 @@
 // setup hono env
 import { auth } from "./lib/auth";
-import { todos } from "./db/schema";
+import { todos, tags } from "./db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
 
@@ -38,3 +38,30 @@ export const patchTodoSchema = todosInsertSchema
     "Provide at least one of title, description, or completed."
   );
 export type PatchTodo = z.infer<typeof patchTodoSchema>;
+
+// * Tag
+export type Tag = typeof tags.$inferSelect;
+export type TagQuery = Omit<Tag, "createdAt"> & {
+  createdAt: string;
+};
+
+export const tagsInsertSchema = createInsertSchema(tags);
+export const createTagSchema = tagsInsertSchema
+  .pick({ name: true, colorHex: true })
+  .refine((p) => !!p.name && p.name.trim().length > 0, {
+    message: "Name is required",
+  })
+  .refine((p) => !!p.colorHex && p.colorHex.trim().length === 7, {
+    message: "Only accept Hex color format e.g. #ffffff",
+  });
+export type CreateTag = z.infer<typeof createTagSchema>;
+export const patchTagSchema = tagsInsertSchema
+  .pick({
+    name: true,
+    colorHex: true,
+  })
+  .partial()
+  .refine((p) => !!p.name, {
+    message: "Name is required",
+  });
+export type PatchTag = z.infer<typeof patchTagSchema>;

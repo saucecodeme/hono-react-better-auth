@@ -5,7 +5,9 @@ import {
   uuid,
   varchar,
   text,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const todos = pgTable("todos", {
   id: uuid().primaryKey().defaultRandom(),
@@ -18,6 +20,22 @@ export const todos = pgTable("todos", {
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
+
+export const tags = pgTable(
+  "tags",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    name: varchar({ length: 100 }).notNull(),
+    colorHex: varchar({ length: 7 }).notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check("color_hex_length", sql`char_length(${table.colorHex}) = 7`),
+  ]
+);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

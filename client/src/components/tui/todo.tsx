@@ -2,7 +2,9 @@ import * as React from 'react'
 import type { TodoQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
-import { Input as TInput } from '@/components/tui/input'
+import { Input as TInput, AutoWidthInput } from '@/components/tui/input'
+import { Tag, CirclePlus } from 'lucide-react'
+import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
 
 export interface TodoComponentProps {
   todo: TodoQuery
@@ -14,6 +16,7 @@ export interface TodoComponentProps {
   // handleEditCommit: () => void
   handleEditInputKeyDown: (e: React.KeyboardEvent<HTMLFormElement>) => void
   handleLoseFocus: (e: React.FocusEvent<HTMLFormElement>) => void
+  containerRef: (el: HTMLFormElement) => void
 }
 
 export const TodoComponent = React.forwardRef<
@@ -30,30 +33,24 @@ export const TodoComponent = React.forwardRef<
       handleEditInputChange,
       handleEditInputKeyDown,
       handleLoseFocus,
+      containerRef,
     },
     ref
   ) => {
-    const handleOnBlur = (e: React.FocusEvent<HTMLFormElement>) => {
-      console.log(e.currentTarget)
-
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        console.log('Outside the form')
-      }
-    }
+    const [isOpenTag, setIsOpenTag] = React.useState(false)
 
     return (
-      <>
+      <div className="flex flex-col gap-0">
         <motion.form
           layout
-          // ref={ref}
-          className={`w-[300px] h-fit px-2 flex flex-col items-start justify-start rounded-lg \
-            ${isEditing ? '' : ''}`}
+          // ref={containerRef}
+          className={`w-[300px] h-fit flex flex-col items-start justify-start rounded-lg`}
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
           onChange={handleEditInputChange}
           onKeyDown={handleEditInputKeyDown}
-          onBlur={handleLoseFocus}
+          // onBlur={handleLoseFocus}
           animate={{
-            scale: isEditing ? 1.04 : 1,
+            scale: isEditing ? 1 : 1,
             backgroundColor: isEditing ? '#fffcec10' : 'rgba(0,0,0,0)',
             padding: isEditing ? '8px 8px' : '4px 8px',
             margin: isEditing ? '10px 0px' : '0px 0px',
@@ -106,16 +103,88 @@ export const TodoComponent = React.forwardRef<
                 <textarea
                   id={`desc-${todo.id}`}
                   name="description"
-                  className="my-1 mb-3 w-full text-sm outline-none resize-none overflow-hidden field-sizing-content"
+                  className="my-1 w-full text-sm outline-none resize-none overflow-hidden field-sizing-content"
                   defaultValue={editingTodo.description ?? ''}
                   placeholder="Notes"
                   style={{ minHeight: '24px' }}
                 />
+                <div className="w-full flex justify-between items-center">
+                  <div className="flex flex-row gap-1">
+                    {/* <div className="px-2 py-1 flex flex-row gap-1 items-center bg-s-destructive/50 rounded-lg text-xs">
+                      <Tag size={10} strokeWidth={3} />
+                      <span>Frontend</span>
+                    </div>
+                    <div className="px-2 py-1 flex flex-row gap-1 items-center bg-s-success/50 rounded-lg text-xs">
+                      <Tag size={10} strokeWidth={3} />
+                      <span>Backend</span>
+                    </div> */}
+                    {/* <TagComponent tagName="Frontend" />
+                    <TagComponent tagName="Backend" /> */}
+                  </div>
+                </div>
+                <div className="w-full flex justify-end">
+                  <Tag
+                    size={14}
+                    strokeWidth={3}
+                    className="self-end"
+                    onClick={() => setIsOpenTag((prev) => !prev)}
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </motion.form>
-      </>
+
+        <AnimatePresence>
+          {isOpenTag && (
+            <motion.div
+              layout
+              className="overflow-hidden w-[300px] bg-[#fffcec10] rounded-lg"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{
+                opacity: { duration: 0.1 },
+                height: { duration: 0.3 },
+                padding: { duration: 0.3 },
+              }}
+            >
+              <TagsComponent />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     )
   }
 )
+
+{
+  /* <Dialog>
+  <div className="w-full h-5 flex flex-row justify-end items-center">
+    <DialogTrigger>
+      <Tag size={14} strokeWidth={3} />
+    </DialogTrigger>
+    <DialogContent
+      className="p-4 bg-s-accent/10 rounded-lg min-w-[250px]
+        shadow-lg
+        flex flex-col items-center justify-start gap-4 backdrop-blur-sm"
+    >
+      <p>Tags</p>
+      <div className="w-full flex flex-col gap-2 items-start justify-start">
+        {['Frontend', 'Backend', 'UIUX'].map((tagName) => (
+          <div
+            key={tagName}
+            className="flex flex-row justify-start items-center gap-2"
+          >
+            <Tag size={12} strokeWidth={2} />
+            <span>{tagName}</span>
+          </div>
+        ))}
+      </div>
+    </DialogContent>
+  </div>
+</Dialog> */
+}
+{
+  /* <div className="mb-3 " /> */
+}
