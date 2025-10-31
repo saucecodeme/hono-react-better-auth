@@ -1,3 +1,4 @@
 import { networkModeHelper } from './tanstack-query/networkModeHelper'
+import { generateRandomHexColor, generateRandomHexColorWithBrightness } from './color'
 
-export { networkModeHelper }
+export { networkModeHelper, generateRandomHexColor, generateRandomHexColorWithBrightness }

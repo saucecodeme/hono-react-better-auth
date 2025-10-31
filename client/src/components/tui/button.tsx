@@ -6,7 +6,7 @@ const buttonVariants = cva(
   'font-marlin font-medium inline-flex items-center justify-center cursor-pointer whitespace-nowrap \
     outline-none rounded-lg transition-all duration-200 ease-in-out \
     disabled:pointer-events-none disabled:opacity-50 will-change-transform \
-    shrink-0 focus-visible:ring-s-foreground/50 focus-visible:ring-[2px]',
+    shrink-0 focus-visible:ring-s-foreground/50 focus-visible:ring-2',
   {
     variants: {
       variant: {

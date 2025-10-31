@@ -3,7 +3,8 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { hc } from 'hono/client'
 import type { AppType } from '../../../server'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BadgeAlert } from 'lucide-react'
+import { BadgeAlert, Tag } from 'lucide-react'
+// import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 import { motion } from 'motion/react'
@@ -18,18 +19,21 @@ import { TodoComponent } from '@/components/tui/todo'
 import { UI } from '@/lib/constants'
 
 import {
-  createTodoSchema,
   patchTodoSchema,
   type CreateTodo,
   type TodoQuery,
+  type TagQuery,
 } from '../../../server/types'
 import z from 'zod'
+import { Dialog, DialogContent } from '@/components/tui/dialog'
+import { TagsComponent } from '@/components/tui/tagsComponent'
 
 export const Route = createFileRoute('/todos')({
   component: RouteComponent,
 })
 
 type Todos = TodoQuery[]
+type Tags = TagQuery[]
 
 const client = hc<AppType>('/')
 
@@ -44,7 +48,9 @@ const TODO: TodoQuery = {
 }
 
 function RouteComponent() {
-  const { data: session } = authClient.useSession()
+  const [forceLoading, setForceLoading] = React.useState(true)
+
+  const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
   const { data, isLoading, error } = useQuery<Todos>({
@@ -55,21 +61,42 @@ function RouteComponent() {
       return res.json()
     },
   })
+  const { data: tagsData } = useQuery<Tags>({
+    queryKey: ['tags'],
+    queryFn: async () => {
+      const res = await client.api.tags.$get()
+      if (!res.ok) throw new Error('Failed to fetch todos')
+      return res.json()
+    },
+  })
 
-  const todos = React.useMemo(() => {
-    return data ?? []
-  }, [data])
+  React.useEffect(() => {
+    const ref = setTimeout(() => {
+      setForceLoading(false)
+    }, 3000)
+    return clearTimeout(ref)
+  }, [])
 
+  // Only recalculate this value when the deps change
+  const todos = React.useMemo(() => data ?? [], [data])
+  // For mapping, eliminated unnecessary loop method
   const todoMap = React.useMemo(
     () => new Map(todos.map((todo) => [todo.id, todo])),
     [todos]
   )
+  const tags = React.useMemo(() => tagsData ?? [], [tagsData])
+  // const tagMap = React.useMemo(
+  //   () => new Map(tags.map((tag) => [tag.id, tag])),
+  //   [tags]
+  // )
 
   const [editingTodoId, setEditingTodoId] = React.useState<string | null>(null)
   const [editingTodo, setEditingTodo] = React.useState<TodoQuery>(TODO)
 
   const editingInputRef = React.useRef<HTMLInputElement>(null)
   const clickTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  // const currentTodoContainerRef = React.useRef<HTMLFormElement | null>(null)
+  const todoContainerRefs = React.useRef<Record<string, HTMLFormElement>>({})
 
   const showError = React.useEffectEvent((message: string) => {
     triggerToast('error', message)
@@ -81,11 +108,16 @@ function RouteComponent() {
     }
   })
 
+  // Comment this out first
+  const navigateToSignin = React.useEffectEvent(() => {
+    router.navigate({ to: '/signin', replace: true })
+  })
+
   React.useEffect(() => {
-    if (!session) {
-      router.navigate({ to: '/signin', replace: true })
+    if (!session && !isPending) {
+      navigateToSignin()
     }
-  }, [router, session])
+  }, [session, isPending, navigateToSignin])
 
   React.useEffect(() => {
     if (!editingTodoId) return
@@ -217,7 +249,7 @@ function RouteComponent() {
           showError(
             mutationError instanceof Error
               ? mutationError.message
-              : 'Failed to delete todo'
+              : 'Failed to update todo'
           )
         },
       }
@@ -245,9 +277,8 @@ function RouteComponent() {
 
   const handleLoseFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        handleEditCommit()
-      }
+      // const isMovingToDialog = e.relatedTarget?.closest('[role="dialog"]')
+      if (!e.currentTarget.contains(e.relatedTarget)) handleEditCommit()
     },
     [handleEditCommit]
   )
@@ -305,7 +336,24 @@ function RouteComponent() {
     })
   }, [createTodo, queryClient, showError])
 
-  if (isLoading) {
+  // React.useEffect(() => {
+  //   if (!editingTodoId) return
+
+  //   function handleDocumentClick(e: MouseEvent) {
+  //     if (!editingTodoId) return
+  //     if (
+  //       todoContainerRefs.current[editingTodoId] &&
+  //       !todoContainerRefs.current[editingTodoId].contains(e.target as Node)
+  //     ) {
+  //       handleEditCommit()
+  //     }
+  //   }
+
+  //   document.addEventListener('mousedown', handleDocumentClick)
+  //   return () => document.removeEventListener('mousedown', handleDocumentClick)
+  // }, [editingTodoId, handleEditCommit])
+
+  if (isLoading && forceLoading) {
     return (
       <div className="route-starter flex flex-col">
         <div className="flex flex-col gap-4 w-[100px]">
@@ -333,24 +381,49 @@ function RouteComponent() {
     <section className="route-starter">
       <div className="w-full flex flex-col items-center gap-4">
         <motion.div>
-          {todos.map((todo) => {
-            const isEditing = editingTodoId === todo.id
-            return (
-              <TodoComponent
-                ref={editingInputRef}
-                key={todo.id}
-                todo={todo}
-                isEditing={isEditing}
-                editingTodo={editingTodo}
-                handleTodoClick={handleTodoClick}
-                handleTodoDoubleClick={handleTodoDoubleClick}
-                handleEditInputChange={handleEditInputChange}
-                handleEditInputKeyDown={handleEditInputKeyDown}
-                handleLoseFocus={handleLoseFocus}
-              />
-            )
-          })}
+          <Dialog>
+            {todos.map((todo) => {
+              const isEditing = editingTodoId === todo.id
+              return (
+                <TodoComponent
+                  ref={editingInputRef}
+                  key={todo.id}
+                  todo={todo}
+                  isEditing={isEditing}
+                  editingTodo={editingTodo}
+                  handleTodoClick={handleTodoClick}
+                  handleTodoDoubleClick={handleTodoDoubleClick}
+                  handleEditInputChange={handleEditInputChange}
+                  handleEditInputKeyDown={handleEditInputKeyDown}
+                  handleLoseFocus={handleLoseFocus}
+                  containerRef={(el: HTMLFormElement) => {
+                    todoContainerRefs.current[todo.id] = el
+                  }}
+                />
+              )
+            })}
+            <TagsComponent tags={tags} />
+            <DialogContent
+              className="px-4 py-4 bg-s-accent/30 rounded-lg min-w-[250px] shadow-lg \
+                flex flex-col items-center justify-start gap-4 backdrop-blur-sm"
+            >
+              <p>Tags</p>
+              <div className="w-full flex flex-col gap-1 items-start justify-start">
+                {['Frontend', 'Backend', 'UIUX'].map((tagName) => (
+                  <div
+                    key={tagName}
+                    className="w-full px-3 py-1 flex flex-row justify-start items-center \
+                        rounded-md gap-2 text-s-primary hover:bg-black/20 transition-all duration-200 ease-in-out"
+                  >
+                    <Tag size={12} strokeWidth={3} />
+                    <span>{tagName}</span>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
         </motion.div>
+
         <motion.div
           layout
           className="w-fit"
