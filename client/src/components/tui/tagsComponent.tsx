@@ -17,7 +17,13 @@ import {
 } from '@/utils/tanstack-query/useMutation'
 import { generateRandomHexColor } from '@/utils'
 
-export const TagsComponent = ({ tags }: { tags: TagQuery[] }) => {
+export const TagsComponent = ({
+  tags,
+  onTagClick,
+}: {
+  tags: TagQuery[]
+  onTagClick?: (tagId: string) => void
+}) => {
   const tagMap = React.useMemo(
     () => new Map(tags.map((tag) => [tag.id, tag])),
     [tags]
@@ -150,6 +156,9 @@ export const TagsComponent = ({ tags }: { tags: TagQuery[] }) => {
 
     clickTimeoutRef.current = setTimeout(() => {
       // Add tag to todo
+      if (onTagClick) {
+        onTagClick(id)
+      }
     }, 200)
   }
 

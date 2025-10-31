@@ -336,6 +336,68 @@ function RouteComponent() {
     })
   }, [createTodo, queryClient, showError])
 
+  const handleTagAdd = React.useCallback(
+    (todoId: string, tagId: string) => {
+      const todo = todoMap.get(todoId)
+      if (!todo) return
+
+      // Check if tag is already added
+      const currentTags = todo.tags ?? []
+      if (currentTags.includes(tagId)) return
+
+      const newTags = [...currentTags, tagId]
+      patchTodo.mutate(
+        { id: todoId, data: { tags: newTags } },
+        {
+          onSuccess: (updatedTodo) => {
+            const todo = updatedTodo as TodoQuery
+            queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
+              prev.map((item) => (item.id === todo.id ? todo : item))
+            )
+          },
+          onError: (mutationError) => {
+            showError(
+              mutationError instanceof Error
+                ? mutationError.message
+                : 'Failed to add tag to todo'
+            )
+          },
+        }
+      )
+    },
+    [patchTodo, queryClient, showError, todoMap]
+  )
+
+  const handleTagRemove = React.useCallback(
+    (todoId: string, tagId: string) => {
+      const todo = todoMap.get(todoId)
+      if (!todo) return
+
+      const currentTags = todo.tags ?? []
+      const newTags = currentTags.filter((id) => id !== tagId)
+
+      patchTodo.mutate(
+        { id: todoId, data: { tags: newTags } },
+        {
+          onSuccess: (updatedTodo) => {
+            const todo = updatedTodo as TodoQuery
+            queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
+              prev.map((item) => (item.id === todo.id ? todo : item))
+            )
+          },
+          onError: (mutationError) => {
+            showError(
+              mutationError instanceof Error
+                ? mutationError.message
+                : 'Failed to remove tag from todo'
+            )
+          },
+        }
+      )
+    },
+    [patchTodo, queryClient, showError, todoMap]
+  )
+
   // React.useEffect(() => {
   //   if (!editingTodoId) return
 
@@ -391,11 +453,14 @@ function RouteComponent() {
                   todo={todo}
                   isEditing={isEditing}
                   editingTodo={editingTodo}
+                  allTags={tags}
                   handleTodoClick={handleTodoClick}
                   handleTodoDoubleClick={handleTodoDoubleClick}
                   handleEditInputChange={handleEditInputChange}
                   handleEditInputKeyDown={handleEditInputKeyDown}
                   handleLoseFocus={handleLoseFocus}
+                  handleTagAdd={handleTagAdd}
+                  handleTagRemove={handleTagRemove}
                   containerRef={(el: HTMLFormElement) => {
                     todoContainerRefs.current[todo.id] = el
                   }}

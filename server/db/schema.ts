@@ -6,6 +6,7 @@ import {
   varchar,
   text,
   check,
+  json,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -17,6 +18,7 @@ export const todos = pgTable("todos", {
   title: varchar({ length: 500 }).notNull(),
   description: varchar({ length: 1000 }),
   completed: boolean().notNull().default(false),
+  tags: json("tags").$type<string[]>().default([]),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });

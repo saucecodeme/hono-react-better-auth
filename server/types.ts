@@ -20,7 +20,7 @@ export type TodoQuery = Omit<Todo, "createdAt" | "updatedAt"> & {
 // Zod schemas from Drizzle ORM schemas
 export const todosInsertSchema = createInsertSchema(todos);
 export const createTodoSchema = todosInsertSchema
-  .pick({ title: true, description: true })
+  .pick({ title: true, description: true, tags: true })
   .refine((p) => !!p.title && p.title.trim().length > 0, {
     message: "Title is required",
   });
@@ -31,11 +31,12 @@ export const patchTodoSchema = todosInsertSchema
     title: true,
     description: true,
     completed: true,
+    tags: true,
   })
   .partial()
   .refine(
     (payload) => Object.keys(payload).length > 0,
-    "Provide at least one of title, description, or completed."
+    "Provide at least one of title, description, completed, or tags."
   );
 export type PatchTodo = z.infer<typeof patchTodoSchema>;
 
