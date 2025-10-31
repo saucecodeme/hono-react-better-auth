@@ -398,6 +398,52 @@ function RouteComponent() {
     [patchTodo, queryClient, showError, todoMap]
   )
 
+  const handleAIPlan = React.useCallback(
+    async (todoId: string) => {
+      const todo = todoMap.get(todoId)
+      if (!todo) return
+
+      try {
+        triggerToast('info', 'Planning your todo with AI...')
+
+        const res = await client.api.ai['plan-todo'].$post({
+          json: {
+            title: todo.title,
+            description: todo.description ?? undefined,
+          },
+        })
+
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(
+            error.error || 'Failed to plan todo with AI'
+          )
+        }
+
+        const data = await res.json()
+        console.log('AI Planned Todos:')
+        console.log('==================')
+        data.todos.forEach((plannedTodo: { title: string; description?: string }, index: number) => {
+          console.log(`${index + 1}. ${plannedTodo.title}`)
+          if (plannedTodo.description) {
+            console.log(`   Description: ${plannedTodo.description}`)
+          }
+        })
+        console.log('==================')
+
+        triggerToast('success', `AI created ${data.todos.length} sub-tasks! Check console for details.`)
+      } catch (error) {
+        console.error('Failed to plan todo with AI:', error)
+        showError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to plan todo with AI'
+        )
+      }
+    },
+    [showError, todoMap]
+  )
+
   React.useEffect(() => {
     if (!editingTodoId) return
 
@@ -461,6 +507,7 @@ function RouteComponent() {
                   handleLoseFocus={handleLoseFocus}
                   handleTagAdd={handleTagAdd}
                   handleTagRemove={handleTagRemove}
+                  handleAIPlan={handleAIPlan}
                   containerRef={(el: HTMLFormElement) => {
                     todoContainerRefs.current[todo.id] = el
                   }}
