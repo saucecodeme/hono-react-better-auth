@@ -5,7 +5,6 @@ import { tags } from "./routes/tag.routes";
 import { serveStatic } from "hono/bun";
 import { logger } from "hono/logger";
 
-// const app = new Hono().basePath("/api");
 const app = new Hono();
 
 const router = app

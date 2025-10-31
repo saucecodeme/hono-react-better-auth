@@ -20,15 +20,6 @@ export const createTodo = async (
   return todo;
 };
 
-// export const patchTodo = async (userId: string, todoId: string, patchTodo: PatchTodo) => {
-//   const updatedTodo = db
-//     .update(todos)
-//     .set(patchTodo)
-//     .where(and(eq(todos.id, todoId), eq(todos.userId, userId)))
-//     .returning();
-//   return updatedTodo;
-// };
-
 export const patchTodo = async (
   userId: string,
   todoId: string,

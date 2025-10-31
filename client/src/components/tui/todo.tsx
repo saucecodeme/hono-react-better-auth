@@ -13,7 +13,6 @@ export interface TodoComponentProps {
   handleTodoClick: (id: string) => void
   handleTodoDoubleClick: (id: string) => void
   handleEditInputChange: (e: React.FormEvent<HTMLFormElement>) => void
-  // handleEditCommit: () => void
   handleEditInputKeyDown: (e: React.KeyboardEvent<HTMLFormElement>) => void
   handleLoseFocus: (e: React.FocusEvent<HTMLFormElement>) => void
   containerRef: (el: HTMLFormElement) => void
@@ -43,8 +42,7 @@ export const TodoComponent = React.forwardRef<
       <div className="flex flex-col gap-0">
         <motion.form
           layout
-          // ref={containerRef}
-          className={`w-[300px] h-fit flex flex-col items-start justify-start rounded-lg`}
+          className="w-[300px] h-fit flex flex-col items-start justify-start rounded-lg"
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
           onChange={handleEditInputChange}
           onKeyDown={handleEditInputKeyDown}

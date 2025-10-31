@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 import { motion } from 'motion/react'
 import { Button as TButton } from '@/components/tui/button'
-// import { Input as TInput } from '@/components/tui/input'
 import {
   useCreateTodo,
   usePatchTodo,
@@ -17,6 +16,7 @@ import {
 } from '@/utils/tanstack-query/useMutation'
 import { triggerToast } from '@/utils/sonner/triggerToast'
 import { TodoComponent } from '@/components/tui/todo'
+import { UI } from '@/lib/constants'
 
 import {
   patchTodoSchema,
@@ -128,17 +128,14 @@ function RouteComponent() {
     return () => cancelAnimationFrame(frame)
   }, [editingTodoId])
 
-  // To make sure that the callback is not running after unmount
   React.useEffect(() => {
     return () => clearPendingClick()
   }, [clearPendingClick])
 
-  // Use useMutation from TanStack Query to send the request and call invalidateQueries on success
   const createTodo = useCreateTodo()
   const patchTodo = usePatchTodo()
   const deleteTodo = useDeleteTodo()
 
-  // Single & Double click, Editing mode
   const handleCompleteToggle = React.useCallback(
     (id: string) => {
       const todo = todoMap.get(id)
@@ -172,12 +169,11 @@ function RouteComponent() {
   const handleTodoClick = React.useCallback(
     (id: string) => {
       clearPendingClick()
-      // if (editingTodoId) return // Do nothing in the editing mode
 
       clickTimeoutRef.current = setTimeout(() => {
         handleCompleteToggle(id)
         clickTimeoutRef.current = null
-      }, 200)
+      }, UI.DOUBLE_CLICK_DELAY_MS)
     },
     [clearPendingClick, handleCompleteToggle]
   )
@@ -214,8 +210,9 @@ function RouteComponent() {
     if (!newTitle && !newDescription) {
       deleteTodo.mutate(editingTodoId, {
         onSuccess: (deletedTodo) => {
+          const todo = deletedTodo as TodoQuery
           queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
-            prev.filter((todo) => todo.id !== (deletedTodo as TodoQuery).id)
+            prev.filter((item) => item.id !== todo.id)
           )
         },
         onError: (mutationError) => {
@@ -242,13 +239,10 @@ function RouteComponent() {
       { id: editingTodoId, data: parsed.data },
       {
         onSuccess: (updatedTodo) => {
+          const todo = updatedTodo as TodoQuery
           triggerToast('save')
           queryClient.setQueryData<Todos>(['todos'], (prev = []) =>
-            prev.map((todo) =>
-              todo.id === (updatedTodo as TodoQuery).id
-                ? (updatedTodo as TodoQuery)
-                : todo
-            )
+            prev.map((item) => (item.id === todo.id ? todo : item))
           )
         },
         onError: (mutationError) => {
@@ -283,7 +277,6 @@ function RouteComponent() {
 
   const handleLoseFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
-      // console.log(e)
       // const isMovingToDialog = e.relatedTarget?.closest('[role="dialog"]')
       if (!e.currentTarget.contains(e.relatedTarget)) handleEditCommit()
     },
@@ -294,14 +287,13 @@ function RouteComponent() {
     (e: React.FormEvent<HTMLFormElement>) => {
       const form = e.currentTarget
       const formData = new FormData(form)
-      const payload = Object.fromEntries(formData.entries()) as {
-        title: string
-        description: string
-      }
+      const title = formData.get('title')
+      const description = formData.get('description')
+
       setEditingTodo((prev) => ({
-        ...(prev as TodoQuery),
-        title: payload.title as string,
-        description: payload.description as string,
+        ...prev,
+        title: typeof title === 'string' ? title : '',
+        description: typeof description === 'string' ? description : '',
       }))
     },
     []
@@ -325,16 +317,14 @@ function RouteComponent() {
     const blankTodo: CreateTodo = { title: 'New todo', description: '' }
     createTodo.mutate(blankTodo, {
       onSuccess: (createdTodo) => {
-        // update query data cache manually (UI update instantly) -> this is not instantly
+        const todo = createdTodo as TodoQuery
         queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
-          createdTodo as TodoQuery,
+          todo,
           ...prev,
         ])
         triggerToast('save', 'Init new todo')
-        // handleTodoDoubleClick((createdTodo as TodoQuery).id)
-        // handleEditTodo((createdTodo as TodoQuery).id)
-        setEditingTodoId((createdTodo as TodoQuery).id)
-        setEditingTodo(createdTodo as TodoQuery)
+        setEditingTodoId(todo.id)
+        setEditingTodo(todo)
       },
       onError: (mutationError) => {
         showError(

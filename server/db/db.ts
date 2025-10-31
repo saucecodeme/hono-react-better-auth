@@ -9,16 +9,6 @@ import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
 
-// prod
-// const sql = neon(process.env.DATABASE_URL);
-// export const db = drizzle({ client: sql });
-
-// dev
-// export const pool = new Pool({
-//   connectionString: process.env.DATABASE_URL!,
-// });
-// export const db = drizzle({ client: pool });
-
 let dbClient:
   | (NodePgDatabase<Record<string, never>> & {
       $client: Pool;
