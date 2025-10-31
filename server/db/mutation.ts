@@ -5,13 +5,14 @@ import type { CreateTodo, PatchTodo, CreateTag, PatchTag } from "../types";
 
 export const createTodo = async (
   userId: string,
-  { title, description }: CreateTodo
+  { title, description, tags }: CreateTodo
 ) => {
   const [todo] = await db
     .insert(todos)
     .values({
       title,
       description: description ?? null,
+      tags: tags ?? [],
       completed: false,
       userId,
     })

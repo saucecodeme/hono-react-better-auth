@@ -1,20 +1,23 @@
 import * as React from 'react'
-import type { TodoQuery } from '../../../../server/types'
+import type { TodoQuery, TagQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput, AutoWidthInput } from '@/components/tui/input'
-import { Tag, CirclePlus } from 'lucide-react'
+import { Tag, CirclePlus, X } from 'lucide-react'
 import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
 
 export interface TodoComponentProps {
   todo: TodoQuery
   isEditing: boolean
   editingTodo: TodoQuery
+  allTags: TagQuery[]
   handleTodoClick: (id: string) => void
   handleTodoDoubleClick: (id: string) => void
   handleEditInputChange: (e: React.FormEvent<HTMLFormElement>) => void
   handleEditInputKeyDown: (e: React.KeyboardEvent<HTMLFormElement>) => void
   handleLoseFocus: (e: React.FocusEvent<HTMLFormElement>) => void
+  handleTagAdd: (todoId: string, tagId: string) => void
+  handleTagRemove: (todoId: string, tagId: string) => void
   containerRef: (el: HTMLFormElement) => void
 }
 
@@ -27,16 +30,27 @@ export const TodoComponent = React.forwardRef<
       todo,
       isEditing,
       editingTodo,
+      allTags,
       handleTodoClick,
       handleTodoDoubleClick,
       handleEditInputChange,
       handleEditInputKeyDown,
       handleLoseFocus,
+      handleTagAdd,
+      handleTagRemove,
       containerRef,
     },
     ref
   ) => {
     const [isOpenTag, setIsOpenTag] = React.useState(false)
+    const [hoveredTagId, setHoveredTagId] = React.useState<string | null>(null)
+
+    // Get tag objects for the current todo's tags
+    const todoTags = React.useMemo(() => {
+      if (!todo.tags || todo.tags.length === 0) return []
+      const tagMap = new Map(allTags.map((tag) => [tag.id, tag]))
+      return todo.tags.map((tagId) => tagMap.get(tagId)).filter(Boolean) as TagQuery[]
+    }, [todo.tags, allTags])
 
     return (
       <div className="flex flex-col gap-0">
@@ -131,6 +145,33 @@ export const TodoComponent = React.forwardRef<
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Display tags at the end of todo container */}
+          {todoTags.length > 0 && (
+            <div className="pl-6 mt-1 flex flex-row gap-1 flex-wrap">
+              {todoTags.map((tag) => (
+                <motion.div
+                  key={tag.id}
+                  style={{ backgroundColor: `${tag.colorHex}70` }}
+                  className="px-2 py-1 flex flex-row gap-1 items-center rounded-lg text-xs cursor-pointer"
+                  onMouseEnter={() => setHoveredTagId(tag.id)}
+                  onMouseLeave={() => setHoveredTagId(null)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleTagRemove(todo.id, tag.id)
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {hoveredTagId === tag.id ? (
+                    <X size={10} strokeWidth={3} />
+                  ) : (
+                    <Tag size={10} strokeWidth={3} />
+                  )}
+                  <span>{tag.name}</span>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.form>
 
         <AnimatePresence>
@@ -147,7 +188,10 @@ export const TodoComponent = React.forwardRef<
                 padding: { duration: 0.3 },
               }}
             >
-              <TagsComponent />
+              <TagsComponent
+                tags={allTags}
+                onTagClick={(tagId) => handleTagAdd(todo.id, tagId)}
+              />
             </motion.div>
           )}
         </AnimatePresence>
