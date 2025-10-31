@@ -3,7 +3,7 @@ import type { TodoQuery, TagQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput, AutoWidthInput } from '@/components/tui/input'
-import { Tag, CirclePlus, X } from 'lucide-react'
+import { Tag, CirclePlus, X, Bot } from 'lucide-react'
 import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
 import { TagsComponent } from './tagsComponent'
 
@@ -19,6 +19,7 @@ export interface TodoComponentProps {
   handleLoseFocus: (e: React.FocusEvent<HTMLFormElement>) => void
   handleTagAdd: (todoId: string, tagId: string) => void
   handleTagRemove: (todoId: string, tagId: string) => void
+  handleAIPlan: (todoId: string) => void
   containerRef: (el: HTMLFormElement) => void
 }
 
@@ -39,6 +40,7 @@ export const TodoComponent = React.forwardRef<
       handleLoseFocus,
       handleTagAdd,
       handleTagRemove,
+      handleAIPlan,
       containerRef,
     },
     ref
@@ -142,11 +144,17 @@ export const TodoComponent = React.forwardRef<
                     <TagComponent tagName="Backend" /> */}
                   </div>
                 </div>
-                <div className="w-full flex justify-end">
+                <div className="w-full flex justify-end gap-2">
+                  <Bot
+                    size={14}
+                    strokeWidth={3}
+                    className="self-end cursor-pointer hover:text-s-primary transition-colors"
+                    onClick={() => handleAIPlan(todo.id)}
+                  />
                   <Tag
                     size={14}
                     strokeWidth={3}
-                    className="self-end"
+                    className="self-end cursor-pointer hover:text-s-primary transition-colors"
                     onClick={() => setIsOpenTag((prev) => !prev)}
                   />
                 </div>
