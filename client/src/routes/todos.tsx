@@ -398,22 +398,22 @@ function RouteComponent() {
     [patchTodo, queryClient, showError, todoMap]
   )
 
-  // React.useEffect(() => {
-  //   if (!editingTodoId) return
+  React.useEffect(() => {
+    if (!editingTodoId) return
 
-  //   function handleDocumentClick(e: MouseEvent) {
-  //     if (!editingTodoId) return
-  //     if (
-  //       todoContainerRefs.current[editingTodoId] &&
-  //       !todoContainerRefs.current[editingTodoId].contains(e.target as Node)
-  //     ) {
-  //       handleEditCommit()
-  //     }
-  //   }
+    function handleDocumentClick(e: MouseEvent) {
+      if (!editingTodoId) return
+      if (
+        todoContainerRefs.current[editingTodoId] &&
+        !todoContainerRefs.current[editingTodoId].contains(e.target as Node)
+      ) {
+        handleEditCommit()
+      }
+    }
 
-  //   document.addEventListener('mousedown', handleDocumentClick)
-  //   return () => document.removeEventListener('mousedown', handleDocumentClick)
-  // }, [editingTodoId, handleEditCommit])
+    document.addEventListener('mousedown', handleDocumentClick)
+    return () => document.removeEventListener('mousedown', handleDocumentClick)
+  }, [editingTodoId, handleEditCommit])
 
   if (isLoading && forceLoading) {
     return (
@@ -467,7 +467,7 @@ function RouteComponent() {
                 />
               )
             })}
-            <TagsComponent tags={tags} />
+            {/* <TagsComponent tags={tags} /> */}
             <DialogContent
               className="px-4 py-4 bg-s-accent/30 rounded-lg min-w-[250px] shadow-lg \
                 flex flex-col items-center justify-start gap-4 backdrop-blur-sm"

@@ -57,6 +57,13 @@
       "when": 1761830961754,
       "tag": "0007_dizzy_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1761883391437,
+      "tag": "0008_supreme_namora",
+      "breakpoints": true
     }
   ]
 }

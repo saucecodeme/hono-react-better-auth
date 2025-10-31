@@ -177,13 +177,12 @@ export const TagsComponent = ({
   }, [editingTagId])
 
   return (
-    <div className="w-[300px] p-4 flex flex-row items-start justify-start flex-wrap gap-2 bg-[#fffcec10] rounded-lg">
+    <div className="w-[300px] p-4 flex flex-row items-start justify-start flex-wrap gap-2 rounded-lg">
       {tags.map((tag) => (
         <motion.div
           key={tag.id}
           style={{ backgroundColor: `${tag.colorHex}70` }}
           className="px-2 py-1 flex flex-row gap-1 items-center rounded-lg text-xs"
-          // className="px-2 py-1 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 rounded-lg text-xs"
           onClick={() => handleTagClick(tag.id)}
           onDoubleClick={() => handleTagDoubleClick(tag.id)}
           animate={{
@@ -212,7 +211,7 @@ export const TagsComponent = ({
         </motion.div>
       ))}
       <div
-        className="px-2 py-1 my-2 w-full shrink-0 flex flex-row gap-1 justify-center items-center rounded-lg text-xs"
+        className="px-2 py-1 shrink-0 flex flex-row gap-1 justify-center items-center rounded-lg text-xs hover:bg-s-foreground-dark/50"
         onClick={() => handleInitNewTag()}
       >
         <CirclePlus size={10} strokeWidth={3} />

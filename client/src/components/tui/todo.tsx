@@ -5,6 +5,7 @@ import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput, AutoWidthInput } from '@/components/tui/input'
 import { Tag, CirclePlus, X } from 'lucide-react'
 import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
+import { TagsComponent } from './tagsComponent'
 
 export interface TodoComponentProps {
   todo: TodoQuery
@@ -45,16 +46,23 @@ export const TodoComponent = React.forwardRef<
     const [isOpenTag, setIsOpenTag] = React.useState(false)
     const [hoveredTagId, setHoveredTagId] = React.useState<string | null>(null)
 
+    React.useEffect(() => {
+      if (!isEditing) setIsOpenTag(false)
+    }, [isEditing])
+
     // Get tag objects for the current todo's tags
     const todoTags = React.useMemo(() => {
       if (!todo.tags || todo.tags.length === 0) return []
       const tagMap = new Map(allTags.map((tag) => [tag.id, tag]))
-      return todo.tags.map((tagId) => tagMap.get(tagId)).filter(Boolean) as TagQuery[]
+      return todo.tags
+        .map((tagId) => tagMap.get(tagId))
+        .filter(Boolean) as TagQuery[]
     }, [todo.tags, allTags])
 
     return (
       <div className="flex flex-col gap-0">
         <motion.form
+          ref={containerRef}
           layout
           className="w-[300px] h-fit flex flex-col items-start justify-start rounded-lg"
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
