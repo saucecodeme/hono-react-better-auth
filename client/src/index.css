@@ -191,6 +191,14 @@
   }
 }
 
+@layer utilities {
+  .clip-squircle {
+    clip-path: path(
+      'M 0,50 C 0,22 22,0 50,0 C 78,0 100,22 100,50 C 100,78 78,100 50,100 C 22,100 0,78 0,50 Z'
+    );
+  }
+}
+
 .nav-splitter {
   position: absolute;
   left: 0;

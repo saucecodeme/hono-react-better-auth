@@ -19,5 +19,5 @@ export const getTagsByUserId = async (userId: string) => {
     .select()
     .from(tags)
     .where(eq(tags.userId, userId))
-    .orderBy(desc(todos.createdAt));
+    .orderBy(desc(tags.createdAt));
 };

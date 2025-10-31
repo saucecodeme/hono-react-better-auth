@@ -22,15 +22,18 @@ import {
   patchTodoSchema,
   type CreateTodo,
   type TodoQuery,
+  type TagQuery,
 } from '../../../server/types'
 import z from 'zod'
 import { Dialog, DialogContent } from '@/components/tui/dialog'
+import { TagsComponent } from '@/components/tui/tagsComponent'
 
 export const Route = createFileRoute('/todos')({
   component: RouteComponent,
 })
 
 type Todos = TodoQuery[]
+type Tags = TagQuery[]
 
 const client = hc<AppType>('/')
 
@@ -58,6 +61,14 @@ function RouteComponent() {
       return res.json()
     },
   })
+  const { data: tagsData } = useQuery<Tags>({
+    queryKey: ['tags'],
+    queryFn: async () => {
+      const res = await client.api.tags.$get()
+      if (!res.ok) throw new Error('Failed to fetch todos')
+      return res.json()
+    },
+  })
 
   React.useEffect(() => {
     const ref = setTimeout(() => {
@@ -67,24 +78,26 @@ function RouteComponent() {
   }, [])
 
   // Only recalculate this value when the deps change
-  const todos = React.useMemo(() => {
-    // console.log('Todos:', data)
-    return data ?? []
-  }, [data])
+  const todos = React.useMemo(() => data ?? [], [data])
   // For mapping, eliminated unnecessary loop method
   const todoMap = React.useMemo(
     () => new Map(todos.map((todo) => [todo.id, todo])),
     [todos]
   )
+  const tags = React.useMemo(() => tagsData ?? [], [tagsData])
+  // const tagMap = React.useMemo(
+  //   () => new Map(tags.map((tag) => [tag.id, tag])),
+  //   [tags]
+  // )
 
-  // const [isAdding, setIsAdding] = React.useState(false)
   const [editingTodoId, setEditingTodoId] = React.useState<string | null>(null)
   const [editingTodo, setEditingTodo] = React.useState<TodoQuery>(TODO)
 
   const editingInputRef = React.useRef<HTMLInputElement>(null)
   const clickTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  // const currentTodoContainerRef = React.useRef<HTMLFormElement | null>(null)
+  const todoContainerRefs = React.useRef<Record<string, HTMLFormElement>>({})
 
-  // ? No need to wrap this inside useEffectEvent
   const showError = React.useEffectEvent((message: string) => {
     triggerToast('error', message)
   })
@@ -102,20 +115,9 @@ function RouteComponent() {
 
   React.useEffect(() => {
     if (!session && !isPending) {
-      // router.navigate({ to: '/signin', replace: true })
       navigateToSignin()
     }
   }, [session, isPending, navigateToSignin])
-
-  // Focusing the specific element for better UX
-  // React.useEffect(() => {
-  //   if (!isAdding) return
-  //   const frame = requestAnimationFrame(() => {
-  //     newTodoInputRef.current?.focus()
-  //   })
-
-  //   return () => cancelAnimationFrame(frame)
-  // }, [isAdding])
 
   React.useEffect(() => {
     if (!editingTodoId) return
@@ -135,49 +137,6 @@ function RouteComponent() {
   const createTodo = useCreateTodo()
   const patchTodo = usePatchTodo()
   const deleteTodo = useDeleteTodo()
-
-  // Prevent TButton unnecessary re-renders
-  // const handleToggleAdd = React.useCallback(
-  //   () => setIsAdding((prev) => !prev),
-  //   []
-  // )
-
-  // ? No need to wrap this inside useCallback
-  // const handleSubmitNewTodo = React.useCallback(
-  //   (e: React.FormEvent<HTMLFormElement>) => {
-  //     e.preventDefault()
-  //     const formData = new FormData(e.currentTarget)
-  //     const payload = Object.fromEntries(formData.entries()) as {
-  //       title: string
-  //     }
-  //     const parsed = createTodoSchema.safeParse(payload)
-  //     if (parsed.error) {
-  //       showError(z.treeifyError(parsed.error).errors?.[0] ?? 'Invalid input')
-  //       return
-  //     }
-
-  //     createTodo.mutate(parsed.data, {
-  //       onSuccess: (createdTodo) => {
-  //         // update query data cache manually (UI update instantly)
-  //         queryClient.setQueryData<Todos>(['todos'], (prev = []) => [
-  //           createdTodo as TodoQuery,
-  //           ...prev,
-  //         ])
-  //       },
-  //       onError: (mutationError) => {
-  //         showError(
-  //           mutationError instanceof Error
-  //             ? mutationError.message
-  //             : 'Failed to create todo'
-  //         )
-  //       },
-  //     })
-
-  //     e.currentTarget.reset()
-  //     setIsAdding(false)
-  //   },
-  //   [createTodo, queryClient, showError]
-  // )
 
   // Single & Double click, Editing mode
   const handleCompleteToggle = React.useCallback(
@@ -296,7 +255,7 @@ function RouteComponent() {
           showError(
             mutationError instanceof Error
               ? mutationError.message
-              : 'Failed to delete todo'
+              : 'Failed to update todo'
           )
         },
       }
@@ -324,11 +283,9 @@ function RouteComponent() {
 
   const handleLoseFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
-      console.log(e.currentTarget, e.target)
-      const isMovingToDialog = e.relatedTarget?.closest('[role="dialog"]')
-      console.log(isMovingToDialog)
-      if (!e.currentTarget.contains(e.relatedTarget) && !isMovingToDialog)
-        handleEditCommit()
+      // console.log(e)
+      // const isMovingToDialog = e.relatedTarget?.closest('[role="dialog"]')
+      if (!e.currentTarget.contains(e.relatedTarget)) handleEditCommit()
     },
     [handleEditCommit]
   )
@@ -389,6 +346,23 @@ function RouteComponent() {
     })
   }, [createTodo, queryClient, showError])
 
+  // React.useEffect(() => {
+  //   if (!editingTodoId) return
+
+  //   function handleDocumentClick(e: MouseEvent) {
+  //     if (!editingTodoId) return
+  //     if (
+  //       todoContainerRefs.current[editingTodoId] &&
+  //       !todoContainerRefs.current[editingTodoId].contains(e.target as Node)
+  //     ) {
+  //       handleEditCommit()
+  //     }
+  //   }
+
+  //   document.addEventListener('mousedown', handleDocumentClick)
+  //   return () => document.removeEventListener('mousedown', handleDocumentClick)
+  // }, [editingTodoId, handleEditCommit])
+
   if (isLoading && forceLoading) {
     return (
       <div className="route-starter flex flex-col">
@@ -417,81 +391,6 @@ function RouteComponent() {
     <section className="route-starter">
       <div className="w-full flex flex-col items-center gap-4">
         <motion.div>
-          {/* {isAdding && (
-            <motion.form
-              className="w-full py-3 flex flex-row item-start gap-1.5"
-              initial={{ opacity: 0, y: -16, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.98 }}
-              transition={{
-                type: 'spring',
-                delay: 0.2,
-                bounce: 0,
-                duration: 0.35,
-              }}
-              onSubmit={handleSubmitNewTodo}
-            >
-              <TInput
-                ref={newTodoInputRef}
-                name="title"
-                placeholder="What needs to be done?"
-                className="h-8 w-full text-sm"
-                required
-              />
-              <TButton
-                type="submit"
-                variant="plain"
-                className="h-8 rounded-md flex self-stretch items-center justify-center bg-black/80 hover:bg-black"
-                size="default"
-                disabled={createTodo.isPending}
-              >
-                <Save size={16} />
-              </TButton>
-            </motion.form>
-          )} */}
-
-          {/* {todos.map((todo) => {
-            const isEditing = editingTodoId === todo.id
-
-            return (
-              <motion.div
-                key={todo.id}
-                layout
-                animate={{ scale: isEditing ? 1.04 : 1 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                className="min-w-[250px] flex items-center gap-2 rounded-md px-2 py-1 select-none"
-                // onClick={() => handleTodoClick(todo.id)}
-                onDoubleClick={() => handleTodoDoubleClick(todo.id)}
-              >
-                <TCheckbox
-                  hidden={isEditing}
-                  checked={todo.completed}
-                  onCheckedChange={() => handleTodoClick(todo.id)}
-                />
-                {isEditing ? (
-                  <TInput
-                    // ref={editingInputRef}
-                    value={editingValue}
-                    onChange={handleEditInputChange}
-                    onBlur={handleEditCommit}
-                    onKeyDown={handleEditInputKeyDown}
-                    className="h-7 w-full text-sm"
-                  />
-                ) : (
-                  <div className="relative inline-block truncate">
-                    <span>{todo.title}</span>
-                    <motion.span
-                      className="pointer-events-none absolute left-0 right-0 top-1/2 h-0.5 bg-current"
-                      initial={false}
-                      animate={{ scaleX: todo.completed ? 1 : 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
-                      style={{ transformOrigin: 'left center' }}
-                    />
-                  </div>
-                )}
-              </motion.div>
-            )
-          })} */}
           <Dialog>
             {todos.map((todo) => {
               const isEditing = editingTodoId === todo.id
@@ -507,34 +406,34 @@ function RouteComponent() {
                   handleEditInputChange={handleEditInputChange}
                   handleEditInputKeyDown={handleEditInputKeyDown}
                   handleLoseFocus={handleLoseFocus}
+                  containerRef={(el: HTMLFormElement) => {
+                    todoContainerRefs.current[todo.id] = el
+                  }}
                 />
               )
             })}
-            <div className="w-full h-5 flex flex-row justify-end items-center">
-              {/* <DialogTrigger>
-                <Tag size={14} strokeWidth={3} />
-              </DialogTrigger> */}
-              <DialogContent
-                className="px-4 py-4 bg-s-accent/30 rounded-lg min-w-[250px] shadow-lg \
+            <TagsComponent tags={tags} />
+            <DialogContent
+              className="px-4 py-4 bg-s-accent/30 rounded-lg min-w-[250px] shadow-lg \
                 flex flex-col items-center justify-start gap-4 backdrop-blur-sm"
-              >
-                <p>Tags</p>
-                <div className="w-full flex flex-col gap-1 items-start justify-start">
-                  {['Frontend', 'Backend', 'UIUX'].map((tagName) => (
-                    <div
-                      key={tagName}
-                      className="w-full px-3 py-1 flex flex-row justify-start items-center \
+            >
+              <p>Tags</p>
+              <div className="w-full flex flex-col gap-1 items-start justify-start">
+                {['Frontend', 'Backend', 'UIUX'].map((tagName) => (
+                  <div
+                    key={tagName}
+                    className="w-full px-3 py-1 flex flex-row justify-start items-center \
                         rounded-md gap-2 text-s-primary hover:bg-black/20 transition-all duration-200 ease-in-out"
-                    >
-                      <Tag size={12} strokeWidth={3} />
-                      <span>{tagName}</span>
-                    </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </div>
+                  >
+                    <Tag size={12} strokeWidth={3} />
+                    <span>{tagName}</span>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
           </Dialog>
         </motion.div>
+
         <motion.div
           layout
           className="w-fit"

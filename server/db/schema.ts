@@ -30,6 +30,7 @@ export const tags = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     name: varchar({ length: 100 }).notNull(),
     colorHex: varchar({ length: 7 }).notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     check("color_hex_length", sql`char_length(${table.colorHex}) = 7`),

@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { todos, tags } from "./schema";
 import { db } from "./db";
-import type { CreateTodo, PatchTodo, CreateTag } from "../types";
+import type { CreateTodo, PatchTodo, CreateTag, PatchTag } from "../types";
 
 export const createTodo = async (
   userId: string,
@@ -60,6 +60,7 @@ export const deleteTodo = async (userId: string, todoId: string) => {
 };
 
 // * Tags
+
 export const createTag = async (
   userId: string,
   { name, colorHex }: CreateTag
@@ -73,4 +74,25 @@ export const createTag = async (
     })
     .returning();
   return tag;
+};
+
+export const patchTag = async (
+  userId: string,
+  tagId: string,
+  patchTag: PatchTag
+) => {
+  const [tag] = await db
+    .update(tags)
+    .set(patchTag)
+    .where(and(eq(tags.userId, userId), eq(tags.id, tagId)))
+    .returning();
+  return tag ?? null;
+};
+
+export const deleteTag = async (userId: string, tagId: string) => {
+  const [tag] = await db
+    .delete(tags)
+    .where(and(eq(tags.userId, userId), eq(tags.id, tagId)))
+    .returning();
+  return tag ?? null;
 };

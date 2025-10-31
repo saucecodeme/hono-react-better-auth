@@ -40,6 +40,11 @@ export const patchTodoSchema = todosInsertSchema
 export type PatchTodo = z.infer<typeof patchTodoSchema>;
 
 // * Tag
+export type Tag = typeof tags.$inferSelect;
+export type TagQuery = Omit<Tag, "createdAt"> & {
+  createdAt: string;
+};
+
 export const tagsInsertSchema = createInsertSchema(tags);
 export const createTagSchema = tagsInsertSchema
   .pick({ name: true, colorHex: true })
@@ -50,3 +55,13 @@ export const createTagSchema = tagsInsertSchema
     message: "Only accept Hex color format e.g. #ffffff",
   });
 export type CreateTag = z.infer<typeof createTagSchema>;
+export const patchTagSchema = tagsInsertSchema
+  .pick({
+    name: true,
+    colorHex: true,
+  })
+  .partial()
+  .refine((p) => !!p.name, {
+    message: "Name is required",
+  });
+export type PatchTag = z.infer<typeof patchTagSchema>;

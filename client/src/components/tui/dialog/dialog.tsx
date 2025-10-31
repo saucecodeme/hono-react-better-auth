@@ -8,8 +8,14 @@ type DialogContextType = {
 
 const DialogContext = React.createContext<DialogContextType | null>(null)
 
-export const Dialog = ({ children }: { children: React.ReactNode }) => {
-  const [open, setOpen] = React.useState(false)
+export const Dialog = ({
+  children,
+  defaultOpen = false,
+}: {
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) => {
+  const [open, setOpen] = React.useState(defaultOpen)
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   return (
     <DialogContext.Provider value={{ open, setOpen, triggerRef }}>

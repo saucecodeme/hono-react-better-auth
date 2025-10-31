@@ -33,3 +33,63 @@ export function Input({
     />
   )
 }
+
+export function AutoWidthInput({
+  type = 'text',
+  variant,
+  className,
+  value,
+  defaultValue,
+  onChange,
+  ...props
+}: React.ComponentProps<'input'> & VariantProps<typeof inputVariants>) {
+  const [inputValue, setInputValue] = React.useState(value || defaultValue || '')
+  const [width, setWidth] = React.useState('1ch')
+  const spanRef = React.useRef<HTMLSpanElement>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setInputValue(value)
+    }
+  }, [value])
+
+  React.useEffect(() => {
+    if (spanRef.current) {
+      const spanWidth = spanRef.current.offsetWidth
+      setWidth(`${spanWidth}px`)
+    }
+  }, [inputValue])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+    onChange?.(e)
+  }
+
+  return (
+    <>
+      <span
+        ref={spanRef}
+        className="invisible absolute whitespace-pre"
+        style={{
+          fontFamily: getComputedStyle(document.body).fontFamily,
+          fontSize: inputRef.current ? getComputedStyle(inputRef.current).fontSize : '14px',
+          fontWeight: inputRef.current ? getComputedStyle(inputRef.current).fontWeight : '400',
+          letterSpacing: inputRef.current ? getComputedStyle(inputRef.current).letterSpacing : 'normal',
+        }}
+      >
+        {inputValue || ''}
+      </span>
+      <input
+        ref={inputRef}
+        type={type}
+        data-slot="input"
+        className={cn(inputVariants({ variant }), className)}
+        value={inputValue}
+        onChange={handleChange}
+        style={{ width }}
+        {...props}
+      />
+    </>
+  )
+}
