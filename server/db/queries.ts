@@ -14,6 +14,19 @@ export const getTodosByUserId = async (userId: string) => {
     .orderBy(desc(todos.createdAt));
 };
 
+export const getTodosWithTagsByUserId = async (userId: string) => {
+  return await db.query.todos.findMany({
+    where: eq(todos.userId, userId),
+    with: {
+      todosToTags: {
+        with: {
+          tag: true,
+        },
+      },
+    },
+  });
+};
+
 export const getTagsByUserId = async (userId: string) => {
   return db
     .select()

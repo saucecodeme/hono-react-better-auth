@@ -6,14 +6,15 @@ import {
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import ws from "ws";
+import * as schema from "./schema";
 
 neonConfig.webSocketConstructor = ws;
 
 let dbClient:
-  | (NodePgDatabase<Record<string, never>> & {
+  | (NodePgDatabase<typeof schema> & {
       $client: Pool;
     })
-  | NeonHttpDatabase<Record<string, never>>;
+  | NeonHttpDatabase<typeof schema>;
 
 const getDbConnection = () => {
   if (!process.env.DATABASE_URL)
@@ -23,12 +24,12 @@ const getDbConnection = () => {
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
     });
-    dbClient = drizzle({ client: pool });
+    dbClient = drizzle({ client: pool, schema });
   }
 
   if (!dbClient && process.env.APP_ENV === "production") {
     const sql = neon(process.env.DATABASE_URL);
-    dbClient = neonDrizzle({ client: sql });
+    dbClient = neonDrizzle({ client: sql, schema });
   }
   return dbClient;
 };

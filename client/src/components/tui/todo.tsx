@@ -3,8 +3,8 @@ import type { TodoQuery, TagQuery } from '../../../../server/types'
 import { motion, AnimatePresence } from 'motion/react'
 import { Checkbox as TCheckbox } from '@/components/tui/checkbox'
 import { Input as TInput, AutoWidthInput } from '@/components/tui/input'
-import { Tag, CirclePlus, X } from 'lucide-react'
-import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
+import { Tag, Bot, X } from 'lucide-react'
+// import { Dialog, DialogTrigger, DialogContent } from '@/components/tui/dialog'
 import { TagsComponent } from './tagsComponent'
 
 export interface TodoComponentProps {
@@ -19,7 +19,8 @@ export interface TodoComponentProps {
   handleLoseFocus: (e: React.FocusEvent<HTMLFormElement>) => void
   handleTagAdd: (todoId: string, tagId: string) => void
   handleTagRemove: (todoId: string, tagId: string) => void
-  containerRef: (el: HTMLFormElement) => void
+  handleAIPlan: (todoId: string) => void
+  containerRef: (el: HTMLDivElement) => void
 }
 
 export const TodoComponent = React.forwardRef<
@@ -39,6 +40,7 @@ export const TodoComponent = React.forwardRef<
       handleLoseFocus,
       handleTagAdd,
       handleTagRemove,
+      handleAIPlan,
       containerRef,
     },
     ref
@@ -60,9 +62,8 @@ export const TodoComponent = React.forwardRef<
     }, [todo.tags, allTags])
 
     return (
-      <div className="flex flex-col gap-0">
+      <div ref={containerRef} className="flex flex-col gap-0">
         <motion.form
-          ref={containerRef}
           layout
           className="w-[300px] h-fit flex flex-col items-start justify-start rounded-lg"
           onDoubleClick={() => handleTodoDoubleClick(todo.id)}
@@ -128,34 +129,54 @@ export const TodoComponent = React.forwardRef<
                   placeholder="Notes"
                   style={{ minHeight: '24px' }}
                 />
-                <div className="w-full flex justify-between items-center">
-                  <div className="flex flex-row gap-1">
-                    {/* <div className="px-2 py-1 flex flex-row gap-1 items-center bg-s-destructive/50 rounded-lg text-xs">
-                      <Tag size={10} strokeWidth={3} />
-                      <span>Frontend</span>
-                    </div>
-                    <div className="px-2 py-1 flex flex-row gap-1 items-center bg-s-success/50 rounded-lg text-xs">
-                      <Tag size={10} strokeWidth={3} />
-                      <span>Backend</span>
-                    </div> */}
-                    {/* <TagComponent tagName="Frontend" />
-                    <TagComponent tagName="Backend" /> */}
+                {todoTags.length > 0 && (
+                  <div className="flex flex-row gap-1 flex-wrap">
+                    {todoTags.map((tag) => (
+                      <motion.div
+                        key={tag.id}
+                        style={{ backgroundColor: `${tag.colorHex}70` }}
+                        className="px-2 py-1 flex flex-row gap-1 items-center rounded-lg text-xs cursor-pointer"
+                        onMouseEnter={() => setHoveredTagId(tag.id)}
+                        onMouseLeave={() => setHoveredTagId(null)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTagRemove(todo.id, tag.id)
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        {hoveredTagId === tag.id ? (
+                          <X size={10} strokeWidth={3} />
+                        ) : (
+                          <Tag size={10} strokeWidth={3} />
+                        )}
+                        <span>{tag.name}</span>
+                      </motion.div>
+                    ))}
                   </div>
-                </div>
-                <div className="w-full flex justify-end">
-                  <Tag
-                    size={14}
-                    strokeWidth={3}
-                    className="self-end"
+                )}
+                <div className="w-full flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    className="p-1 rounded-sm hover:bg-s-foreground-dark/20"
+                    onClick={() => handleAIPlan(todo.id)}
+                  >
+                    <Bot size={14} strokeWidth={3} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="p-1 rounded-sm hover:bg-s-foreground-dark/20"
                     onClick={() => setIsOpenTag((prev) => !prev)}
-                  />
+                  >
+                    <Tag size={14} strokeWidth={3} />
+                  </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* Display tags at the end of todo container */}
-          {todoTags.length > 0 && (
+          {/* {todoTags.length > 0 && (
             <div className="pl-6 mt-1 flex flex-row gap-1 flex-wrap">
               {todoTags.map((tag) => (
                 <motion.div
@@ -179,7 +200,7 @@ export const TodoComponent = React.forwardRef<
                 </motion.div>
               ))}
             </div>
-          )}
+          )} */}
         </motion.form>
 
         <AnimatePresence>
@@ -187,9 +208,9 @@ export const TodoComponent = React.forwardRef<
             <motion.div
               layout
               className="overflow-hidden w-[300px] bg-[#fffcec10] rounded-lg"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, height: 0, marginBottom: '0px' }}
+              animate={{ opacity: 1, height: 'auto', marginBottom: '10px' }}
+              exit={{ opacity: 0, height: 0, marginBottom: '0px' }}
               transition={{
                 opacity: { duration: 0.1 },
                 height: { duration: 0.3 },

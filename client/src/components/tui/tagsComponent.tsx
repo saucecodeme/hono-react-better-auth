@@ -177,7 +177,7 @@ export const TagsComponent = ({
   }, [editingTagId])
 
   return (
-    <div className="w-[300px] p-4 flex flex-row items-start justify-start flex-wrap gap-2 rounded-lg">
+    <div className="w-[300px] p-4 flex flex-row items-start justify-start flex-wrap gap-1 rounded-lg">
       {tags.map((tag) => (
         <motion.div
           key={tag.id}
@@ -211,7 +211,7 @@ export const TagsComponent = ({
         </motion.div>
       ))}
       <div
-        className="px-2 py-1 shrink-0 flex flex-row gap-1 justify-center items-center rounded-lg text-xs hover:bg-s-foreground-dark/50"
+        className="px-2 py-1 shrink-0 flex flex-row gap-1 justify-center items-center rounded-lg text-xs hover:bg-s-foreground-dark/20"
         onClick={() => handleInitNewTag()}
       >
         <CirclePlus size={10} strokeWidth={3} />

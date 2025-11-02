@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { auth } from "./lib/auth";
 import { todos } from "./routes/todo.routes";
 import { tags } from "./routes/tag.routes";
+import { ai } from "./routes/ai.routes";
+import { test } from "./routes/test.routes";
 import { serveStatic } from "hono/bun";
 import { logger } from "hono/logger";
 
@@ -13,6 +15,8 @@ const router = app
   .on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw))
   .route("/api/todos", todos)
   .route("/api/tags", tags)
+  .route("/api/ai", ai)
+  .route("/api/test", test)
   .get("*", serveStatic({ path: "./client/index.html" }));
 
 export type AppType = typeof router;

@@ -1,8 +1,15 @@
 import type { ComponentType } from 'react'
 import { toast } from 'sonner'
-import { Unplug, BadgeCheck, Bug, Save } from 'lucide-react'
+import { Unplug, BadgeCheck, Bug, Save, Info, CircleCheck } from 'lucide-react'
 
-type TriggerCase = 'signin' | 'signout' | 'offline' | 'error' | 'save'
+type TriggerCase =
+  | 'signin'
+  | 'signout'
+  | 'offline'
+  | 'error'
+  | 'save'
+  | 'info'
+  | 'success'
 
 type ToastConfig = {
   message: string
@@ -29,6 +36,14 @@ const toastConfig: Record<TriggerCase, ToastConfig> = {
   save: {
     message: 'Autosave',
     icon: Save,
+  },
+  info: {
+    message: 'Info',
+    icon: Info,
+  },
+  success: {
+    message: 'Successfully',
+    icon: CircleCheck,
   },
 }
 

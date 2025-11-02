@@ -26,7 +26,7 @@ import {
 } from '../../../server/types'
 import z from 'zod'
 import { Dialog, DialogContent } from '@/components/tui/dialog'
-import { TagsComponent } from '@/components/tui/tagsComponent'
+// import { TagsComponent } from '@/components/tui/tagsComponent'
 
 export const Route = createFileRoute('/todos')({
   component: RouteComponent,
@@ -43,6 +43,7 @@ const TODO: TodoQuery = {
   updatedAt: '',
   userId: '',
   title: '',
+  tags: [],
   description: '',
   completed: false,
 }
@@ -96,7 +97,7 @@ function RouteComponent() {
   const editingInputRef = React.useRef<HTMLInputElement>(null)
   const clickTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   // const currentTodoContainerRef = React.useRef<HTMLFormElement | null>(null)
-  const todoContainerRefs = React.useRef<Record<string, HTMLFormElement>>({})
+  const todoContainerRefs = React.useRef<Record<string, HTMLDivElement>>({})
 
   const showError = React.useEffectEvent((message: string) => {
     triggerToast('error', message)
@@ -398,6 +399,68 @@ function RouteComponent() {
     [patchTodo, queryClient, showError, todoMap]
   )
 
+  const handleAIPlan = React.useCallback(
+    async (todoId: string) => {
+      const todo = todoMap.get(todoId)
+      if (!todo) return
+
+      console.log('handleAIPlan', todo)
+
+      try {
+        triggerToast('info', 'Planning your todo with AI...')
+
+        const res = await client.api.ai['plan-todo'].$post({
+          json: {
+            title: todo.title,
+            description: todo.description ?? undefined,
+          },
+        })
+
+        if (!res.ok) {
+          const error = (await res.json()) as { error: string }
+          throw new Error(error.error || 'Failed to plan todo with AI')
+        }
+
+        const data = await res.json()
+        console.log('AI Planned Todos:')
+        console.log('==================')
+        data.todos.forEach(
+          (
+            plannedTodo: {
+              title: string
+              description?: string
+              steps?: string[]
+            },
+            index: number
+          ) => {
+            console.log(`${index + 1}. ${plannedTodo.title}`)
+            if (plannedTodo.description) {
+              console.log(`   Description: ${plannedTodo.description}`)
+            }
+
+            if (plannedTodo.steps) {
+              for (const step of plannedTodo.steps) {
+                console.log(`   ${step}`)
+              }
+            }
+          }
+        )
+        console.log('==================')
+
+        triggerToast(
+          'success',
+          `AI created ${data.todos.length} sub-tasks! Check console for details.`
+        )
+      } catch (error) {
+        console.error('Failed to plan todo with AI:', error)
+        showError(
+          error instanceof Error ? error.message : 'Failed to plan todo with AI'
+        )
+      }
+    },
+    [showError, todoMap]
+  )
+
   React.useEffect(() => {
     if (!editingTodoId) return
 
@@ -461,7 +524,8 @@ function RouteComponent() {
                   handleLoseFocus={handleLoseFocus}
                   handleTagAdd={handleTagAdd}
                   handleTagRemove={handleTagRemove}
-                  containerRef={(el: HTMLFormElement) => {
+                  handleAIPlan={handleAIPlan}
+                  containerRef={(el: HTMLDivElement) => {
                     todoContainerRefs.current[todo.id] = el
                   }}
                 />

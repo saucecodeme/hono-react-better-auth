@@ -66,3 +66,5 @@ export const patchTagSchema = tagsInsertSchema
     message: "Name is required",
   });
 export type PatchTag = z.infer<typeof patchTagSchema>;
+
+export type NewTagV2 = typeof tags.$inferInsert;

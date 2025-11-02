@@ -7,21 +7,36 @@ import {
   text,
   check,
   json,
+  foreignKey,
+  index,
+  uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
-export const todos = pgTable("todos", {
-  id: uuid().primaryKey().defaultRandom(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  title: varchar({ length: 500 }).notNull(),
-  description: varchar({ length: 1000 }),
-  completed: boolean().notNull().default(false),
-  tags: json("tags").$type<string[]>().default([]),
-  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-});
+export const todos = pgTable(
+  "todos",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: varchar({ length: 500 }).notNull(),
+    description: varchar({ length: 1000 }),
+    completed: boolean().notNull().default(false),
+    tags: json("tags").$type<string[]>().default([]),
+    createdAt: timestamp({ withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp({ withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("todos_user_id_idx").on(table.userId),
+    index("todos_created_at_idx").on(table.createdAt),
+  ]
+);
 
 export const tags = pgTable(
   "tags",
@@ -32,10 +47,34 @@ export const tags = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     name: varchar({ length: 100 }).notNull(),
     colorHex: varchar({ length: 7 }).notNull(),
-    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp({ withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
+    uniqueIndex("tags_name_idx").on(table.name), // Ensure unique tag name
     check("color_hex_length", sql`char_length(${table.colorHex}) = 7`),
+  ]
+);
+
+// Junction table for many-to-many relationship
+export const todosToTags = pgTable(
+  "todos_to_tags",
+  {
+    todoId: uuid("todo_id")
+      .notNull()
+      .references(() => todos.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+    assignedAt: timestamp("assigned_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.todoId, table.tagId] }),
+    index("todos_to_tags_todo_id_idx").on(table.todoId),
+    index("todos_to_tags_tag_id_idx").on(table.tagId),
   ]
 );
 
@@ -98,3 +137,35 @@ export const verification = pgTable("verification", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+// Define relationships
+export const todosRelations = relations(todos, ({ one, many }) => ({
+  // Each todo belongs to one user
+  user: one(user, {
+    fields: [todos.userId],
+    references: [user.id],
+  }),
+  // Each todo has many related tag links
+  todosToTags: many(todosToTags),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  todosToTags: many(todosToTags),
+}));
+
+export const todosToTagsRelations = relations(todosToTags, ({ one }) => ({
+  // Each todosToTag -> one todo
+  todo: one(todos, {
+    fields: [todosToTags.todoId],
+    references: [todos.id],
+  }),
+  // Each todosToTag -> tag
+  tag: one(tags, {
+    fields: [todosToTags.tagId],
+    references: [tags.id],
+  }),
+}));
+
+export const usersRelations = relations(user, ({ many }) => ({
+  todos: many(todos),
+}));
